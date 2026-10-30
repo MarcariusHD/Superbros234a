@@ -26,6 +26,9 @@ namespace MarioBros.Player
         private Sprite[] smallRun, bigRun, smallSwim, bigSwim;
         private Sprite smallIdle, bigIdle, smallJump, bigJump, deathSprite;
         private bool dead;
+        private string scriptedPose;
+        private Sprite crouchSprite, smallClimb, bigClimb;
+        public void SetScriptedPose(string pose) { scriptedPose = pose; frameClock = 0; }
         private float frameClock;
         private bool HasAnimator => animator != null && animator.runtimeAnimatorController != null;
 
@@ -54,6 +57,7 @@ namespace MarioBros.Player
             smallIdle = Frame("Small_Idle"); bigIdle = Frame("Big_Idle");
             smallJump = Frame("Small_Jump"); bigJump = Frame("Big_Jump");
             deathSprite = Frame("Small_Die");
+            crouchSprite=Frame("Big_Crouch");smallClimb=Frame("Small_Climb");bigClimb=Frame("Big_Climb");
             smallRun = new[] { Frame("Small_Run1"), Frame("Small_Run2"), Frame("Small_Run3") };
             bigRun = new[] { Frame("Big_Run1"), Frame("Big_Run2"), Frame("Big_Run3") };
             smallSwim = new[] { Frame("Small_Swim1"), Frame("Small_Swim2") };
@@ -185,6 +189,18 @@ namespace MarioBros.Player
             if (spriteRenderer == null || playerMovement == null) return;
             Sprite next;
             if (dead) next = deathSprite;
+            else if (!string.IsNullOrEmpty(scriptedPose))
+            {
+                spriteRenderer.flipX=false;
+                if (scriptedPose=="walk")
+                {
+                    frameClock+=Time.unscaledDeltaTime*8;
+                    var frames=isBig?bigRun:smallRun;next=frames[(int)frameClock%frames.Length];
+                }
+                else if (scriptedPose=="climb") next=isBig?bigClimb:smallClimb;
+                else next=isBig?bigIdle:smallIdle;
+            }
+            else if (playerMovement.IsCrouching) next=crouchSprite;
             else if (playerMovement.IsUnderwater)
             {
                 frameClock += Time.deltaTime * 5;

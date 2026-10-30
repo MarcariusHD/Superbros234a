@@ -44,12 +44,13 @@ public static class ReplicaLevelSetup
         BuildOverworld();
         BuildGameOver();
         BuildPendingLevel();
-        var paths = new[] { "SampleScene", "Underground", "Underwater", "World2_3Pending", "GameOver" };
+        BuildTitleScreen();
+        var paths = new[] { "TitleScreen", "SampleScene", "Underground", "Underwater", "World2_3Pending", "GameOver" };
         var extras = EditorBuildSettings.scenes.Where(s => !paths.Any(p => s.path == "Assets/Scenes/" + p + ".unity"));
         EditorBuildSettings.scenes = paths.Select(p => new EditorBuildSettingsScene("Assets/Scenes/" + p + ".unity", true)).Concat(extras).ToArray();
         AssetDatabase.SaveAssets();
-        EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity");
-        EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/SampleScene.unity");
+        EditorSceneManager.OpenScene("Assets/Scenes/TitleScreen.unity");
+        EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/TitleScreen.unity");
         Debug.Log("REPLICA_BUILD_OK: scenes and build settings saved.");
     }
 
@@ -97,10 +98,10 @@ public static class ReplicaLevelSetup
                 if (!water && id == 32) go.GetComponent<SpriteRenderer>().sprite = Sprite(Art + "Underground_0.png");
                 if (water && id == 9)
                 {
-                    go.layer = LayerMask.NameToLayer("EnemyLayer");
+                    go.layer = LayerMask.NameToLayer("Ground");
                     go.AddComponent<CoralHazard>();
                     var hitbox = go.GetComponent<BoxCollider2D>();
-                    hitbox.isTrigger = true;hitbox.size = new Vector2(.65f,.95f);
+                    hitbox.isTrigger = false;hitbox.size = Vector2.one;
                 }
                 if (solid || question)
                 {
@@ -132,6 +133,7 @@ public static class ReplicaLevelSetup
         Camera.main.backgroundColor = water ? new Color32(66,64,255,255) : Color.black;
         Camera.main.transform.position = new Vector3(8, 7.5f, -10);
         var follow = Camera.main.GetComponent<CameraFollow>();
+        SetBool(follow, "followAboveCeiling", !water);
         SetFloat(follow, "minX", 8);
         SetFloat(follow, "maxX", 184);
         SetFloat(follow, "fixedY", 7.5f);
@@ -246,6 +248,7 @@ public static class ReplicaLevelSetup
         foreach (int x in new[] {22,40,51,52,80,82,97,98,114,115,124,125,128,129,174,175})
             GroundEnemy("Goomba",new Vector2(x+.5f,2.45f),root);
         GroundEnemy("Koopa",new Vector2(107.5f,2.8f),root);
+        BuildBonusRoom(root);
         var goal = new GameObject("Goal 1-1 to 1-2");goal.transform.SetParent(root);goal.transform.position = new Vector3(198.5f,2.5f,0);
         var trigger = goal.AddComponent<BoxCollider2D>();trigger.isTrigger = true;trigger.size = new Vector2(.4f,10);trigger.offset = new Vector2(0,5);
         var pole = goal.AddComponent<FlagPole>();
@@ -261,6 +264,7 @@ public static class ReplicaLevelSetup
         Camera.main.backgroundColor = new Color32(92,148,252,255);
         Camera.main.transform.position = new Vector3(8,7.5f,-10);
         var follow = Camera.main.GetComponent<CameraFollow>();SetFloat(follow,"minX",8);SetFloat(follow,"maxX",203);SetFloat(follow,"fixedY",7.5f);
+        SetBool(follow,"followAboveCeiling",false);
         BuildHud("1-1");
         MasterGameSetup.ConfigureGlobalLighting();
         ValidateLevel("SampleScene");
@@ -274,6 +278,24 @@ public static class ReplicaLevelSetup
         go.transform.SetParent(parent);go.transform.position = position;
     }
 
+    private static void BuildBonusRoom(Transform parent)
+    {
+        for(int y=0;y<13;y++) for(int x=0;x<16;x++)
+        {
+            var sprite=Sprite("Assets/Sprites/BonusRoom/Tile_"+x+"_"+y+".png");
+            if(sprite==null)continue;
+            var go=new GameObject("Bonus tile "+x+","+y);go.transform.SetParent(parent);go.transform.position=new Vector3(240+x+.5f,y+.5f,0);
+            var renderer=go.AddComponent<SpriteRenderer>();renderer.sprite=sprite;renderer.sortingLayerName="Ground";
+            bool coin=((y==5||y==7)&&x>=4&&x<=10)||(y==9&&x>=5&&x<=9);
+            if(coin) {go.AddComponent<CircleCollider2D>().radius=.35f;go.AddComponent<Coin>();}
+            else {go.layer=LayerMask.NameToLayer("Ground");go.AddComponent<BoxCollider2D>().size=Vector2.one;}
+        }
+        var entry=new GameObject("Bonus entry - fourth pipe");entry.transform.SetParent(parent);entry.transform.position=new Vector3(58,6.1f,0);
+        var ec=entry.AddComponent<BoxCollider2D>();ec.isTrigger=true;ec.size=new Vector2(1.6f,.4f);entry.AddComponent<BonusPipe>().enterBonus=true;
+        var exit=new GameObject("Bonus exit to pipe 163");exit.transform.SetParent(parent);exit.transform.position=new Vector3(252.8f,3,0);
+        var xc=exit.AddComponent<BoxCollider2D>();xc.isTrigger=true;xc.size=new Vector2(.5f,1.8f);exit.AddComponent<BonusPipe>().enterBonus=false;
+    }
+
     private static void ValidateLevel(string name)
     {
         foreach (var renderer in UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
@@ -283,8 +305,11 @@ public static class ReplicaLevelSetup
             var fish = UnityEngine.Object.FindObjectsByType<SwimmingEnemy>(FindObjectsSortMode.None);
             var corals = UnityEngine.Object.FindObjectsByType<CoralHazard>(FindObjectsSortMode.None);
             if (fish.Length == 0 || corals.Length == 0) throw new InvalidOperationException("Faltan enemigos o corales.");
+            foreach (var coral in corals)
+                if (coral.GetComponent<BoxCollider2D>().isTrigger || coral.gameObject.layer != LayerMask.NameToLayer("Ground"))
+                    throw new InvalidOperationException("El coral debe ser un obstaculo solido sin dano.");
             foreach (var enemy in fish)
-                if (enemy.GetComponent<Rigidbody2D>() == null || !enemy.GetComponent<BoxCollider2D>().isTrigger)
+                if (enemy.GetComponent<Rigidbody2D>() == null || enemy.GetComponent<BoxCollider2D>().isTrigger)
                     throw new InvalidOperationException("Hitbox acuatica incompleta: " + enemy.name);
         }
         if (name == "Underground")
@@ -304,7 +329,7 @@ public static class ReplicaLevelSetup
         go.layer = LayerMask.NameToLayer("EnemyLayer");
         go.GetComponent<SpriteRenderer>().sortingLayerName = "Enemies";
         go.AddComponent<BoxCollider2D>().size = new Vector2(.7f,blooper ? 1.2f : .7f);
-        go.GetComponent<BoxCollider2D>().isTrigger = true;
+        go.GetComponent<BoxCollider2D>().isTrigger = false;
         go.AddComponent<SwimmingEnemy>().blooper = blooper;
     }
 
@@ -312,8 +337,10 @@ public static class ReplicaLevelSetup
     {
         var go = new GameObject("Looping elevator"); go.transform.SetParent(parent); go.transform.position = new Vector3(x,y,0);
         go.layer = LayerMask.NameToLayer("Ground");
-        for (int i = 0; i < 4; i++) Tile("Underground_" + (i == 0 ? 18 : i == 3 ? 20 : 19),new Vector2(x+i-1.5f,y),go.transform);
-        var collider = go.AddComponent<BoxCollider2D>(); collider.size = new Vector2(4,.25f);collider.offset = new Vector2(0,.32f);
+        var visual = new GameObject("Lift sprite").AddComponent<SpriteRenderer>();
+        visual.transform.SetParent(go.transform,false);
+        visual.sprite = Sprite("Assets/Sprites/LiftPlatform.png");visual.sortingLayerName = "Ground";
+        var collider = go.AddComponent<BoxCollider2D>(); collider.size = new Vector2(3,.5f);
         collider.usedByEffector = true;
         go.AddComponent<PlatformEffector2D>().useOneWay = true;
         go.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
@@ -364,6 +391,16 @@ public static class ReplicaLevelSetup
         EditorSceneManager.SaveScene(SceneManager.GetActiveScene(),"Assets/Scenes/World2_3Pending.unity");
     }
 
+    private static void BuildTitleScreen()
+    {
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+        var camera = new GameObject("Main Camera").AddComponent<Camera>();camera.tag = "MainCamera";
+        camera.clearFlags = CameraClearFlags.SolidColor;camera.backgroundColor = Color.black;
+        camera.gameObject.AddComponent<AudioListener>();
+        new GameObject("Classic Title").AddComponent<ClassicFrontEnd>();
+        EditorSceneManager.SaveScene(SceneManager.GetActiveScene(),"Assets/Scenes/TitleScreen.unity");
+    }
+
     private static Canvas Canvas(string name)
     {
         var go = new GameObject(name,typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
@@ -383,36 +420,19 @@ public static class ReplicaLevelSetup
 
     private static void BuildHud(string world)
     {
-        var old = GameObject.Find("HUD Canvas");if (old != null) UnityEngine.Object.DestroyImmediate(old);
-        var canvas = Canvas("HUD Canvas");var ui = canvas.gameObject.AddComponent<UIManager>();
-        string[] labels = {"MARIO","COINS","WORLD","TIME","LIVES"};
-        string[] fields = {"scoreText","coinsText","worldText","timeText","livesText"};
-        for (int i=0;i<labels.Length;i++)
-        {
-            Vector2 anchor = new Vector2(.12f+i*.19f,1);
-            Text(canvas.transform,labels[i],labels[i],anchor,new Vector2(0,-24),new Vector2(150,30),20);
-            var value = Text(canvas.transform,fields[i],"",anchor,new Vector2(0,-51),new Vector2(150,30),22);
-            Set(ui,fields[i],value);
-        }
-        var so = new SerializedObject(ui);so.FindProperty("currentWorldName").stringValue = world;so.ApplyModifiedPropertiesWithoutUndo();
+        var old = GameObject.Find("HUD Canvas");
+        if (old != null) UnityEngine.Object.DestroyImmediate(old);
+        var canvas = Canvas("HUD Canvas");
+        canvas.gameObject.AddComponent<NesHud>();
     }
 
     private static void BuildGameOver()
     {
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
-        var camera = new GameObject("Main Camera").AddComponent<Camera>();camera.tag = "MainCamera";camera.clearFlags = CameraClearFlags.SolidColor;camera.backgroundColor = Color.black;
+        var camera = new GameObject("Main Camera").AddComponent<Camera>();camera.tag = "MainCamera";
+        camera.clearFlags = CameraClearFlags.SolidColor;camera.backgroundColor = Color.black;
         camera.gameObject.AddComponent<AudioListener>();
-        var canvas = Canvas("Game Over Canvas");
-        var screen = canvas.gameObject.AddComponent<GameOverScreen>();
-        screen.score = Text(canvas.transform,"Final Score","",new Vector2(.5f,.8f),Vector2.zero,new Vector2(800,60),24);
-        Text(canvas.transform,"Game Over","GAME OVER",new Vector2(.5f,.52f),Vector2.zero,new Vector2(800,80),44);
-        Text(canvas.transform,"Restart hint","ENTER / ESPACIO PARA REINTENTAR",new Vector2(.5f,.35f),Vector2.zero,new Vector2(800,50),22);
-        var button = new GameObject("Reintentar",typeof(RectTransform),typeof(Image),typeof(Button));button.transform.SetParent(canvas.transform,false);
-        var rt = button.GetComponent<RectTransform>();rt.anchorMin = rt.anchorMax = new Vector2(.5f,.22f);rt.sizeDelta = new Vector2(240,50);
-        button.GetComponent<Image>().color = new Color(.18f,.18f,.18f);
-        Text(button.transform,"Label","REINTENTAR",new Vector2(.5f,.5f),Vector2.zero,new Vector2(240,50),22);
-        UnityEditor.Events.UnityEventTools.AddPersistentListener(button.GetComponent<Button>().onClick,screen.Restart);
-        new GameObject("EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
+        new GameObject("Game Over NES").AddComponent<GameOverScreen>();
         EditorSceneManager.SaveScene(SceneManager.GetActiveScene(),"Assets/Scenes/GameOver.unity");
     }
 

@@ -1,5 +1,3 @@
-using MarioBros.Player;
-using MarioBros.UI;
 using UnityEngine;
 
 namespace MarioBros.Level
@@ -10,16 +8,9 @@ namespace MarioBros.Level
         private void Awake()
         {
             var hitbox = GetComponent<BoxCollider2D>();
-            hitbox.isTrigger = true;
-            hitbox.size = new Vector2(.65f, .95f);
-        }
-        private void OnTriggerEnter2D(Collider2D other) => Hurt(other);
-        private void OnTriggerStay2D(Collider2D other) => Hurt(other);
-        private void Hurt(Collider2D other)
-        {
-            var health = other.GetComponentInParent<PlayerHealth>();
-            if (health != null && !health.IsDead && GameManager.CurrentState == GameState.Playing)
-                health.TakeDamage();
+            hitbox.isTrigger = false;
+            hitbox.size = Vector2.one;
+            gameObject.layer = LayerMask.NameToLayer("Ground");
         }
     }
 }

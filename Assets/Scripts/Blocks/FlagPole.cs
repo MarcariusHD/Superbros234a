@@ -82,6 +82,8 @@ namespace MarioBros.Blocks
             Rigidbody2D rb = playerObj.GetComponent<Rigidbody2D>();
             Collider2D col = playerObj.GetComponent<Collider2D>();
             SpriteRenderer sr = playerObj.GetComponentInChildren<SpriteRenderer>();
+            PlayerAnimation animation = playerObj.GetComponent<PlayerAnimation>();
+            if(animation!=null) animation.SetScriptedPose("climb");
 
             // Desactivar controles normales de Mario
             if (movement != null)
@@ -156,6 +158,7 @@ namespace MarioBros.Blocks
             yield return new WaitForSeconds(0.4f);
 
             // Caminata hacia el castillo
+            if(animation!=null) animation.SetScriptedPose("walk");
             Vector3 targetWalkPos = castleDestination != null ?
                 castleDestination.position :
                 playerObj.transform.position + new Vector3(7f, 0f, 0f);
@@ -171,6 +174,7 @@ namespace MarioBros.Blocks
             }
 
             // Ocultar a Mario al entrar al castillo
+            playerObj.transform.position=new Vector3(targetWalkPos.x,bottomY,playerObj.transform.position.z);
             if (sr != null)
             {
                 sr.enabled = false;

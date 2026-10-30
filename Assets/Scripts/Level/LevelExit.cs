@@ -31,16 +31,8 @@ namespace MarioBros.Level
         private IEnumerator Travel(GameObject player)
         {
             GameManager.Instance.LevelCompleted();
-            player.GetComponent<PlayerMovement>().enabled = false;
-            var body = player.GetComponent<Rigidbody2D>();
-            body.linearVelocity = Vector2.zero;
-            body.simulated = false;
-            var start = player.transform.position;
-            for (float t = 0; t < 1; t += Time.deltaTime)
-            {
-                player.transform.position = start + (requireDown ? Vector3.down : Vector3.right) * t;
-                yield return null;
-            }
+            var travel=new PipeTransit(player);
+            yield return travel.Enter(transform.position,requireDown);
             SceneManager.LoadScene(nextScene);
         }
     }

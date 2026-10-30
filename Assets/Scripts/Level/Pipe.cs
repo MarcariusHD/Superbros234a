@@ -81,7 +81,7 @@ namespace MarioBros.Level
 
         private void Update()
         {
-            if (!isEnterable || isTransitioning || !isPlayerInTrigger || playerInstance == null)
+            if (!isEnterable || isTransitioning || !isPlayerInTrigger || playerInstance == null || (destinationPipe==null && directExitPoint==null))
             {
                 return;
             }
@@ -191,6 +191,7 @@ namespace MarioBros.Level
             if (sr != null)
             {
                 sr.sortingOrder = -5;
+                sr.sortingLayerName = "Ground";
             }
 
             // Reproducir sonido
@@ -225,7 +226,7 @@ namespace MarioBros.Level
                 player.transform.position = directExitPoint.position;
 
                 // Restaurar componentes
-                if (sr != null) sr.sortingOrder = originalOrder;
+                if (sr != null) { sr.sortingOrder = originalOrder; sr.sortingLayerName="Player"; }
                 foreach (var col in colliders) col.enabled = true;
                 if (rb != null)
                 {
@@ -291,6 +292,7 @@ namespace MarioBros.Level
             if (sr != null)
             {
                 sr.sortingOrder = originalSortingOrder;
+                sr.sortingLayerName = "Player";
             }
 
             foreach (var col in colliders)

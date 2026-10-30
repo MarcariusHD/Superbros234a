@@ -45,6 +45,7 @@ namespace MarioBros.CameraControl
         private Camera cam;
         private float currentVelocityX;
         private float furthestRightX;
+        [SerializeField] private bool followAboveCeiling;
 
         // Propiedades públicas
         public Transform Target { get => target; set => target = value; }
@@ -105,7 +106,8 @@ namespace MarioBros.CameraControl
             }
 
             // Actualizar la posición de la cámara (manteniendo Y y Z fijos)
-            transform.position = new Vector3(newX, fixedY, transform.position.z);
+            float viewY = followAboveCeiling ? Mathf.Clamp(target.position.y - 3f, fixedY, 12f) : fixedY;
+            transform.position = new Vector3(newX, viewY, transform.position.z);
         }
 
         /// <summary>
@@ -116,6 +118,10 @@ namespace MarioBros.CameraControl
             transform.position = new Vector3(newPosition.x, fixedY, transform.position.z);
             furthestRightX = newPosition.x;
             currentVelocityX = 0f;
+        }
+        public void SetRegion(float minimum,float maximum,float initialX)
+        {
+            minX=minimum;maxX=maximum;ResetPosition(new Vector3(initialX,fixedY,transform.position.z));
         }
     }
 }

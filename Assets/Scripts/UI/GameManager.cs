@@ -46,6 +46,7 @@ namespace MarioBros.UI
         public static int Coins { get; private set; } = 0;
         public static int Lives { get; private set; } = 3;
         public static int TimeRemaining { get; private set; } = 400;
+        public static string LastWorld { get; private set; } = "1-1";
         public static GameState CurrentState { get; private set; } = GameState.Playing;
 
         // Eventos para actualización de UI
@@ -92,6 +93,10 @@ namespace MarioBros.UI
         {
             if (Instance != this) return;
             isReloading = false;
+            if (scene.name == "TitleScreen")
+            {
+                isTimerRunning = false;SetState(GameState.LevelComplete);return;
+            }
             if (scene.name == "World2_3Pending")
             {
                 isTimerRunning = false;
@@ -109,7 +114,20 @@ namespace MarioBros.UI
             {
                 ResetTimer();
                 SetState(GameState.Playing);
+                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : null;
+                if (world != null) LastWorld = world;
+                if (world != null && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
+                    StartCoroutine(LevelIntroduction(world));
             }
+        }
+
+        private IEnumerator LevelIntroduction(string world)
+        {
+            SetState(GameState.Paused);
+            var screen = ClassicFrontEnd.ShowIntro(world);
+            yield return new WaitForSecondsRealtime(2);
+            if (screen != null) Destroy(screen);
+            if (CurrentState == GameState.Paused) SetState(GameState.Playing);
         }
 
         private void Update()
@@ -246,6 +264,16 @@ namespace MarioBros.UI
         private void OnTimeUp()
         {
             isTimerRunning = false;
+            StartCoroutine(TimeUpRoutine());
+        }
+
+        private IEnumerator TimeUpRoutine()
+        {
+            SetState(GameState.Paused);
+            var screen = ClassicFrontEnd.ShowStatus("TimeUp", LastWorld);
+            yield return new WaitForSecondsRealtime(2);
+            Destroy(screen);
+            SetState(GameState.Playing);
 
             // Notificar a Mario para que muera si existe en la escena
             GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -255,7 +283,7 @@ namespace MarioBros.UI
                 if (health != null && !health.IsDead)
                 {
                     health.Die();
-                    return;
+                    yield break;
                 }
             }
 

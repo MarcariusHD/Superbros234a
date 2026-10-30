@@ -14,15 +14,19 @@ namespace MarioBros.Enemies
         private SpriteRenderer spriteRenderer;
         private Sprite[] frames;
         private Rigidbody2D body;
+        private BoxCollider2D solid;
+        private float swimDirection = -1;
+        private readonly RaycastHit2D[] hits = new RaycastHit2D[8];
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
-            body.bodyType = RigidbodyType2D.Kinematic;
+            body.bodyType = RigidbodyType2D.Dynamic;
+            body.freezeRotation = true;
             body.gravityScale = 0;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            var hitbox = GetComponent<BoxCollider2D>();
-            hitbox.isTrigger = true;
-            hitbox.size = new Vector2(.8f, blooper ? 1.3f : .8f);
+            solid = GetComponent<BoxCollider2D>();
+            solid.isTrigger = false;
+            solid.size = new Vector2(.8f, blooper ? 1.3f : .8f);
         }
         private void Start()
         {
@@ -34,8 +38,8 @@ namespace MarioBros.Enemies
         }
         private void FixedUpdate()
         {
-            if (player == null || GameManager.CurrentState != GameState.Playing) return;
-            if (Mathf.Abs(player.position.x - transform.position.x) > 18) return;
+            if (player == null || GameManager.CurrentState != GameState.Playing || Mathf.Abs(player.position.x - transform.position.x) > 18)
+            { body.linearVelocity = Vector2.zero; return; }
             phase += Time.deltaTime;
             if (frames != null && spriteRenderer != null)
             {
@@ -53,13 +57,30 @@ namespace MarioBros.Enemies
             }
             else
             {
-                next += Vector3.left * Time.fixedDeltaTime * 1.7f;
+                next += Vector3.right * swimDirection * Time.fixedDeltaTime * 1.7f;
                 next.y = origin.y + Mathf.Sin(phase * 1.7f) * .7f;
             }
-            body.MovePosition(next);
+            Vector2 delta = (Vector2)next - body.position;
+            var filter = new ContactFilter2D();filter.SetLayerMask(LayerMask.GetMask("Ground"));filter.useTriggers = false;
+            int count = solid.Cast(delta.normalized, filter, hits, delta.magnitude + .02f);
+            float travel = delta.magnitude;
+            bool turn = false;
+            for (int i = 0; i < count; i++)
+            {
+                if (Vector2.Dot(hits[i].normal, delta) >= 0) continue;
+                travel = Mathf.Min(travel, Mathf.Max(0, hits[i].distance - .02f));
+                if (Mathf.Abs(hits[i].normal.x) > .5f) turn = true;
+            }
+            body.linearVelocity = delta.normalized * travel / Time.fixedDeltaTime;
+            if (turn) swimDirection = -swimDirection;
+            if (!blooper) spriteRenderer.flipX = swimDirection > 0;
         }
+        private void OnCollisionEnter2D(Collision2D collision) => Hurt(collision.collider);
+        private void OnCollisionStay2D(Collision2D collision) => Hurt(collision.collider);
         private void OnTriggerEnter2D(Collider2D other) => OnTriggerStay2D(other);
         private void OnTriggerStay2D(Collider2D other)
+        { Hurt(other); }
+        private void Hurt(Collider2D other)
         {
             var health = other.GetComponentInParent<PlayerHealth>();
             if (health == null || health.IsDead || GameManager.CurrentState != GameState.Playing) return;

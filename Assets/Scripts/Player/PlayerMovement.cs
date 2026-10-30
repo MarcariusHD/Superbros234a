@@ -82,8 +82,13 @@ namespace MarioBros.Player
         private float jumpTimeCounter;
         private bool isFacingRight = true;
         private bool isDead = false;
+        private readonly RaycastHit2D[] groundHits = new RaycastHit2D[8];
+        private float supportVelocityY;
+        private float ignoreGroundUntil;
+        private Collider2D supportCollider;
         [SerializeField] private bool underwater;
         public bool IsUnderwater => underwater;
+        public bool IsCrouching => playerHealth != null && playerHealth.IsCrouching;
 
         // Propiedades públicas para PlayerAnimation y otros sistemas
         public float CurrentSpeed => Mathf.Abs(rb != null ? rb.linearVelocity.x : 0f);
@@ -143,6 +148,7 @@ namespace MarioBros.Player
 
             // 2. Procesar entrada del jugador (Old Input System con KeyCode)
             ProcessInput();
+            if (playerHealth != null) playerHealth.SetCrouching(MarioInput.Down && !underwater);
 
             // 3. Manejo de salto variable
             HandleJump();
@@ -160,6 +166,7 @@ namespace MarioBros.Player
 
             // Chequeo de suelo mediante Physics2D.OverlapCircle
             CheckGrounded();
+            if (isGrounded) rb.linearVelocity = new Vector2(rb.linearVelocity.x, supportVelocityY);
 
             // Movimiento horizontal con aceleración y desaceleración
             HandleHorizontalMovement();
@@ -203,8 +210,9 @@ namespace MarioBros.Player
             if (MarioInput.JumpDown && isGrounded)
             {
                 isJumping = true;
+                ignoreGroundUntil = Time.time + .12f;
                 jumpTimeCounter = maxJumpTime;
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce + Mathf.Max(0, supportVelocityY));
                 isGrounded = false;
             }
 
@@ -239,6 +247,7 @@ namespace MarioBros.Player
         private void HandleHorizontalMovement()
         {
             float targetSpeed = horizontalInput * (underwater ? 3.2f : (isRunning ? runSpeed : walkSpeed));
+            if (IsCrouching && isGrounded) targetSpeed = 0;
 
             // Detección de colisión con pared frontal para detener la velocidad contra la pared
             if (Mathf.Abs(horizontalInput) > 0.01f && IsTouchingWall(horizontalInput))
@@ -270,17 +279,26 @@ namespace MarioBros.Player
         /// </summary>
         private void CheckGrounded()
         {
-            Vector2 checkPosition = groundCheck != null 
-                ? (Vector2)groundCheck.position 
-                : (Vector2)transform.position + Vector2.down * 0.5f;
-
-            bool wasGrounded = isGrounded;
-            isGrounded = rb.linearVelocity.y <= 0.05f && Physics2D.OverlapCircle(checkPosition, groundCheckRadius, groundLayer);
-
-            // Si aterriza en el suelo, reiniciar estado de salto
-            if (isGrounded && rb.linearVelocity.y <= 0.05f)
+            var previousSupport = supportCollider;
+            supportCollider = null;
+            isGrounded = false;
+            supportVelocityY = 0;
+            if (Time.time < ignoreGroundUntil) return;
+            var filter = new ContactFilter2D();filter.SetLayerMask(groundLayer);filter.useTriggers = false;
+            Bounds bounds = col.bounds;
+            Vector2 origin = new Vector2(bounds.center.x, bounds.min.y + .06f);
+            int count = Physics2D.BoxCast(origin, new Vector2(bounds.size.x * .8f, .05f), 0,
+                Vector2.down, filter, groundHits, .18f);
+            for (int i = 0; i < count; i++)
             {
-                isJumping = false;
+                var hit = groundHits[i];
+                if (hit.collider == col || hit.normal.y < .6f) continue;
+                var lift = hit.collider.GetComponent<MarioBros.Level.LoopingLift>();
+                float supportSpeed = lift != null ? lift.VerticalSpeed : (hit.rigidbody != null ? hit.rigidbody.linearVelocity.y : 0);
+                // Grounding depends on motion relative to the support, not world Y speed.
+                if (hit.collider != previousSupport && rb.linearVelocity.y - supportSpeed > .6f) continue;
+                isGrounded = true; supportCollider = hit.collider; supportVelocityY = supportSpeed; isJumping = false;
+                break;
             }
         }
 

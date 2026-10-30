@@ -202,6 +202,7 @@ namespace MarioBros.Player
         /// <param name="isBigState">True si es grande/fuego, False si es pequeño.</param>
         private void ApplyStateColliders(bool isBigState)
         {
+            IsCrouching = false;
             if (boxCollider == null) return;
 
             if (isBigState)
@@ -214,6 +215,27 @@ namespace MarioBros.Player
                 boxCollider.size = smallColliderSize;
                 boxCollider.offset = smallColliderOffset;
             }
+        }
+
+        public bool IsCrouching { get; private set; }
+        public void SetCrouching(bool crouch)
+        {
+            if (boxCollider == null || isDead) return;
+            crouch = crouch && IsBig;
+            if (crouch == IsCrouching) return;
+            if (!crouch && IsBig)
+            {
+                Vector2 standingCenter=(Vector2)transform.position+bigColliderOffset;
+                if (Physics2D.OverlapBox(standingCenter,bigColliderSize-new Vector2(.08f,.08f),0,LayerMask.GetMask("Ground")) != null) return;
+            }
+            if (crouch)
+            {
+                float bottom=bigColliderOffset.y-bigColliderSize.y*.5f;
+                boxCollider.size=new Vector2(bigColliderSize.x,1.35f);
+                boxCollider.offset=new Vector2(0,bottom+.675f);
+            }
+            else ApplyStateColliders(IsBig);
+            IsCrouching=crouch;
         }
 
         /// <summary>
