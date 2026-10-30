@@ -92,6 +92,12 @@ namespace MarioBros.UI
         {
             if (Instance != this) return;
             isReloading = false;
+            if (scene.name == "World2_3Pending")
+            {
+                isTimerRunning = false;
+                SetState(GameState.LevelComplete);
+                return;
+            }
             if (scene.name == "GameOver")
             {
                 isTimerRunning = false;

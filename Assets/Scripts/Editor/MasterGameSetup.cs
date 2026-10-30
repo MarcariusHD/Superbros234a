@@ -13,24 +13,8 @@ using MarioBros.Level;
 using MarioBros.Player;
 using MarioBros.UI;
 
-[InitializeOnLoad]
 public static class MasterGameSetup
 {
-    private const string SETUP_KEY = "Mario_MasterSetup_Executed_v3";
-
-    static MasterGameSetup()
-    {
-        EditorApplication.delayCall += CheckAndRunSetup;
-    }
-
-    private static void CheckAndRunSetup()
-    {
-        if (!EditorPrefs.GetBool(SETUP_KEY, false))
-        {
-            EditorPrefs.SetBool(SETUP_KEY, true);
-            ExecuteFullSetup();
-        }
-    }
 
     private static T GetOrAddComponent<T>(GameObject go) where T : Component
     {
@@ -44,6 +28,7 @@ public static class MasterGameSetup
     {
         Debug.Log(">>> [MasterGameSetup] Starting 1-Click Game Setup...");
 
+        OriginalSpriteSetup.Extract();
         // 1. Configure Sprites
         ConfigureAllSprites();
 

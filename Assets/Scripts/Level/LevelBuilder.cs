@@ -307,13 +307,13 @@ namespace MarioBros.Level
         // Flag Pole
         if (flagPolePrefab != null)
         {
-            Instantiate(flagPolePrefab, new Vector3(198, 1, 0), Quaternion.identity, itemsParent);
+            Instantiate(flagPolePrefab, new Vector3(198.5f, .5f, 0), Quaternion.identity, itemsParent);
         }
 
         // Castle
         if (castlePrefab != null)
         {
-            Instantiate(castlePrefab, new Vector3(202, 1, 0), Quaternion.identity, decoParent);
+            Instantiate(castlePrefab, new Vector3(204.5f, .5f, 0), Quaternion.identity, decoParent);
         }
     }
 

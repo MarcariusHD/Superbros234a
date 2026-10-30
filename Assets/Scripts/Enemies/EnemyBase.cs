@@ -63,6 +63,8 @@ namespace MarioBros.Enemies
         protected bool isGrounded = false;
         protected bool isActivated = false;
         private readonly RaycastHit2D[] wallHits = new RaycastHit2D[8];
+        private float lastTurnTime = float.NegativeInfinity;
+        private static PhysicsMaterial2D slideMaterial;
 
         // Propiedades públicas
         public bool IsAlive => isAlive;
@@ -75,6 +77,9 @@ namespace MarioBros.Enemies
             col = GetComponent<Collider2D>();
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             animator = GetComponentInChildren<Animator>();
+            if (slideMaterial == null)
+                slideMaterial = new PhysicsMaterial2D("Enemy frictionless") { friction = 0, bounciness = 0 };
+            col.sharedMaterial = slideMaterial;
 
             // Configurar Rigidbody2D para física 2D estándar
             if (rb != null)
@@ -163,7 +168,11 @@ namespace MarioBros.Enemies
         /// </summary>
         public virtual void FlipDirection()
         {
+            if (lastTurnTime == Time.fixedTime) return;
+            lastTurnTime = Time.fixedTime;
             direction.x = -direction.x;
+            if (rb != null && isAlive && isActivated)
+                rb.linearVelocity = new Vector2(direction.x * speed, rb.linearVelocity.y);
             UpdateSpriteDirection();
         }
 
@@ -205,10 +214,15 @@ namespace MarioBros.Enemies
             Vector2 forward = Vector2.right * Mathf.Sign(direction.x);
             // Barrer desde el borde del collider; el antiguo rayo de 0.3 unidades
             // terminaba dentro del propio Goomba (semiancho 0.425).
-            int count = col.Cast(forward, filter, wallHits, Mathf.Max(.02f, wallCheckDistance));
+            Bounds bounds = col.bounds;
+            // Leave clearance above and below the probe so a low ceiling or floor
+            // is not interpreted as a wall through an initial-overlap cast hit.
+            Vector2 probeSize = new Vector2(Mathf.Max(.05f, bounds.size.x - .08f), Mathf.Max(.05f, bounds.size.y - .18f));
+            int count = Physics2D.BoxCast(bounds.center, probeSize, 0, forward, filter, wallHits,
+                Mathf.Max(.06f, speed * Time.fixedDeltaTime + .04f));
             for (int i = 0; i < count; i++)
             {
-                if (Vector2.Dot(wallHits[i].normal, forward) < -.5f)
+                if (wallHits[i].collider != col && wallHits[i].distance > .001f && Vector2.Dot(wallHits[i].normal, forward) < -.7f)
                 {
                     FlipDirection();
                     return;
@@ -223,7 +237,7 @@ namespace MarioBros.Enemies
             // Una normal detrás del enemigo no vuelve a invertir su dirección.
             foreach (var contact in collision.contacts)
             {
-                if (contact.normal.x * direction.x < -.5f)
+                if (contact.normal.x * direction.x < -.7f && Mathf.Abs(contact.normal.y) < .3f)
                 {
                     FlipDirection();
                     break;
@@ -354,6 +368,11 @@ namespace MarioBros.Enemies
 
             // Colisión frontal con otros enemigos: ambos cambian de dirección
             EnemyBase otherEnemy = collision.gameObject.GetComponent<EnemyBase>();
+            if (otherEnemy is KoopaController shell && shell.CurrentState == KoopaState.ShellMoving)
+            {
+                Die(shell.Direction);
+                return;
+            }
             if (otherEnemy != null && otherEnemy.isAlive)
             {
                 // Solo si el contacto es predominantemente horizontal

@@ -65,6 +65,7 @@ namespace MarioBros.Enemies
         private int isMovingHash;
         private Coroutine wakeUpCoroutine;
         private Sprite walkOne, walkTwo, shellSprite;
+        private float kickGraceUntil;
 
         // Propiedad pública para consultar el estado
         public KoopaState CurrentState => currentState;
@@ -206,7 +207,7 @@ namespace MarioBros.Enemies
 
                 case KoopaState.ShellMoving:
                     // Chocar con un caparazón en movimiento hiere a Mario
-                    DamagePlayer(player);
+                    if (Time.time >= kickGraceUntil) DamagePlayer(player);
                     break;
             }
         }
@@ -270,6 +271,7 @@ namespace MarioBros.Enemies
             }
 
             currentState = KoopaState.ShellMoving;
+            kickGraceUntil = Time.time + .15f;
             direction.x = kickDirection.x >= 0f ? 1f : -1f;
             speed = shellSpeed;
 
@@ -287,6 +289,12 @@ namespace MarioBros.Enemies
         private IEnumerator WakeUpRoutine()
         {
             yield return new WaitForSeconds(shellWakeUpTime);
+
+            // Do not expand into a ceiling while the shell is in a one-block tunnel.
+            while (currentState == KoopaState.Shell && isAlive && Physics2D.OverlapBox(
+                (Vector2)transform.position + walkingColliderOffset,
+                walkingColliderSize - new Vector2(.08f,.08f), 0, groundLayer) != null)
+                yield return new WaitForSeconds(.2f);
 
             if (currentState == KoopaState.Shell && isAlive)
             {
@@ -327,7 +335,7 @@ namespace MarioBros.Enemies
         /// </summary>
         private void UpdateAnimatorState(bool isShell, bool isMoving)
         {
-            if (animator != null)
+            if (animator != null && animator.runtimeAnimatorController != null)
             {
                 animator.SetBool(isShellHash, isShell);
                 animator.SetBool(isMovingHash, isMoving);

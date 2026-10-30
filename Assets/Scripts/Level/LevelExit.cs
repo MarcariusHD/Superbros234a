@@ -17,6 +17,13 @@ namespace MarioBros.Level
             var health = other.GetComponent<PlayerHealth>();
             if (entered || health == null || health.IsDead || (requireDown && !MarioInput.Down)) return;
             if (GameManager.CurrentState != GameState.Playing) return;
+            if (requireDown && (Mathf.Abs(other.bounds.center.x - transform.position.x) > .55f ||
+                other.bounds.min.y < transform.position.y - .3f)) return;
+            if (!Application.CanStreamedLevelBeLoaded(nextScene))
+            {
+                Debug.LogError("Falta generar o registrar la escena: " + nextScene, this);
+                return;
+            }
             entered = true;
             StartCoroutine(Travel(other.gameObject));
         }
