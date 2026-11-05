@@ -13,6 +13,7 @@ namespace MarioBros.Enemies
     [RequireComponent(typeof(BoxCollider2D))]
     public class Goomba : EnemyBase
     {
+        [SerializeField] private bool undergroundPalette;
         [Header("Configuración Goomba")]
         [Tooltip("Tiempo en segundos que el Goomba permanece aplastado antes de desaparecer.")]
         [SerializeField] private float squishDuration = 0.5f;
@@ -31,7 +32,7 @@ namespace MarioBros.Enemies
         protected override void Awake()
         {
             base.Awake();
-            string palette = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Underground" ? "Underground" : "Overworld";
+            string palette = undergroundPalette || UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Underground" ? "Underground" : "Overworld";
             string prefix = "MarioFrames/Goomba_" + palette;
             walkOne = Resources.Load<Sprite>(prefix + "_Walk1");
             walkTwo = Resources.Load<Sprite>(prefix + "_Walk2");

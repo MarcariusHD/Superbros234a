@@ -1,4 +1,5 @@
 using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MarioBros.UI
@@ -10,6 +11,25 @@ namespace MarioBros.UI
     /// </summary>
     public class UIManager : MonoBehaviour
     {
+        private readonly Dictionary<TextMeshProUGUI, NesText> pixelTexts = new Dictionary<TextMeshProUGUI, NesText>();
+        private void ConvertHudText()
+        {
+            // Keep the saved HUD layout and replace its font with the menu's NES glyphs.
+            foreach (var source in GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                var label = NesText.Create(source.transform, source.text, 128, 120,
+                    Mathf.Max(8, Mathf.Round(source.fontSize * .75f)));
+                label.rectTransform.sizeDelta = source.rectTransform.rect.size;
+                pixelTexts[source] = label;
+                source.enabled = false;
+            }
+        }
+        private void SetText(TextMeshProUGUI source, string text)
+        {
+            if (source == null) return;
+            source.text = text;
+            if (pixelTexts.TryGetValue(source, out var label)) label.Text = text;
+        }
         [Header("Textos del HUD (TextMeshProUGUI)")]
         [Tooltip("Texto para la puntuación (formato 6 dígitos: 000000).")]
         [SerializeField] private TextMeshProUGUI scoreText;
@@ -65,10 +85,11 @@ namespace MarioBros.UI
 
         private void Start()
         {
+            ConvertHudText();
             // Configuración inicial de visuales
             if (worldText != null)
             {
-                worldText.text = currentWorldName;
+                SetText(worldText, currentWorldName);
             }
 
             if (gameOverPanel != null)
@@ -102,7 +123,7 @@ namespace MarioBros.UI
         {
             if (scoreText != null)
             {
-                scoreText.text = score.ToString("D6");
+                SetText(scoreText, score.ToString("D6"));
             }
         }
 
@@ -113,7 +134,7 @@ namespace MarioBros.UI
         {
             if (coinsText != null)
             {
-                coinsText.text = "x" + coins.ToString("D2");
+                SetText(coinsText, "x" + coins.ToString("D2"));
             }
         }
 
@@ -124,7 +145,7 @@ namespace MarioBros.UI
         {
             if (livesText != null)
             {
-                livesText.text = "x " + Mathf.Max(0, lives).ToString();
+                SetText(livesText, "x " + Mathf.Max(0, lives).ToString());
             }
         }
 
@@ -135,7 +156,7 @@ namespace MarioBros.UI
         {
             if (timeText != null)
             {
-                timeText.text = timeRemaining.ToString("D3");
+                SetText(timeText, timeRemaining.ToString("D3"));
             }
 
             // Mostrar aviso de TIME UP si el contador llega exactamente a cero

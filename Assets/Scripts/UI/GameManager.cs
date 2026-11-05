@@ -24,6 +24,7 @@ namespace MarioBros.UI
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
+        public bool HasCoinAudio => coinSound != null && audioSource != null;
 
         [Header("Configuración Inicial")]
         [Tooltip("Cantidad de vidas iniciales de Mario.")]
@@ -114,9 +115,9 @@ namespace MarioBros.UI
             {
                 ResetTimer();
                 SetState(GameState.Playing);
-                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : null;
+                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : scene.name == "World1_4" ? "1-4" : null;
                 if (world != null) LastWorld = world;
-                if (world != null && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
+                if (world != null && scene.name != "World1_4" && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
                     StartCoroutine(LevelIntroduction(world));
             }
         }

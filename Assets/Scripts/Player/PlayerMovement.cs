@@ -86,8 +86,20 @@ namespace MarioBros.Player
         private float supportVelocityY;
         private float ignoreGroundUntil;
         private Collider2D supportCollider;
+        private bool swimRequested;
         [SerializeField] private bool underwater;
         public bool IsUnderwater => underwater;
+        /// <summary>Permite a un volumen local reutilizar exactamente el nado existente.</summary>
+        public void SetUnderwater(bool value)
+        {
+            if (underwater == value) return;
+            underwater = value;
+            swimRequested = false;
+            isJumping = false;
+            supportCollider = null;
+            isGrounded = false;
+            if (rb != null) rb.gravityScale = value ? .45f : gravityScale;
+        }
         public bool IsCrouching => playerHealth != null && playerHealth.IsCrouching;
 
         // Propiedades públicas para PlayerAnimation y otros sistemas
@@ -166,7 +178,17 @@ namespace MarioBros.Player
 
             // Chequeo de suelo mediante Physics2D.OverlapCircle
             CheckGrounded();
+            if (underwater && swimRequested)
+            {
+                swimRequested = false;
+                isGrounded = false;
+                supportCollider = null;
+                ignoreGroundUntil = Time.time + .12f;
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 4.5f);
+            }
             if (isGrounded) rb.linearVelocity = new Vector2(rb.linearVelocity.x, supportVelocityY);
+            if (underwater)
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(-2.5f, rb.linearVelocity.y));
 
             // Movimiento horizontal con aceleración y desaceleración
             HandleHorizontalMovement();
@@ -202,8 +224,7 @@ namespace MarioBros.Player
             if (underwater)
             {
                 if (MarioInput.JumpDown)
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, 4.5f);
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(-2.5f, rb.linearVelocity.y));
+                    swimRequested = true;
                 return;
             }
             // Inicio del salto al presionar Espacio estando en el suelo

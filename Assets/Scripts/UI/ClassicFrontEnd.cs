@@ -16,6 +16,10 @@ namespace MarioBros.UI
             if (GameManager.Instance == null) new GameObject("GameManager").AddComponent<GameManager>();
             GameManager.Instance.LevelCompleted();
             var root = Screen("Title",transform);
+            var mario = new GameObject("Title Mario",typeof(RectTransform),typeof(Image));
+            mario.transform.SetParent(root,false);
+            mario.GetComponent<Image>().sprite=Resources.Load<Sprite>("MarioFrames/Small_Idle");
+            Place(mario.GetComponent<RectTransform>(),48,200,16,16);
             Hud(root,"1-1",0,0,400);
             var button = new GameObject("Start game",typeof(RectTransform),typeof(Image),typeof(Button));
             button.transform.SetParent(root,false);
@@ -44,7 +48,7 @@ namespace MarioBros.UI
             var root = Screen("LevelIntro",holder.transform);
             Hud(root,world,GameManager.Score,GameManager.Coins,GameManager.TimeRemaining);
             Label(root,"WORLD " + world,128,84,180,20,10);
-            Label(root,GameManager.Lives.ToString(),144,116,24,18,10);
+            Label(root,"x " + GameManager.Lives,136,116,48,18,8);
             return holder;
         }
         public static GameObject ShowStatus(string name,string world)
@@ -59,6 +63,7 @@ namespace MarioBros.UI
             var canvasObject = new GameObject("Classic screen",typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
             canvasObject.transform.SetParent(parent,false);
             var canvas = canvasObject.GetComponent<Canvas>();canvas.renderMode = RenderMode.ScreenSpaceOverlay;canvas.sortingOrder = 2000;
+            canvas.pixelPerfect = true;
             var scaler = canvasObject.GetComponent<CanvasScaler>();scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(256,240);scaler.matchWidthOrHeight = 1;
             var background = new GameObject("Black borders",typeof(RectTransform),typeof(Image));background.transform.SetParent(canvas.transform,false);
@@ -72,9 +77,9 @@ namespace MarioBros.UI
         private static void Hud(Transform root,string world,int score,int coins,int time)
         {
             Label(root,"MARIO\n"+score.ToString("D6"),48,24,88,28,8);
-            Label(root,"x"+coins.ToString("D2"),104,27,40,18,8);
+            Label(root,"x"+coins.ToString("D2"),108,28,40,18,8);
             Label(root,"WORLD\n"+world,164,24,60,28,8);
-            Label(root,"TIME\n"+time.ToString("D3"),220,24,60,28,8);
+            Label(root,"TIME",220,20,60,8,8);
             var coinIcon=new GameObject("HUD coin",typeof(RectTransform),typeof(Image));coinIcon.transform.SetParent(root,false);
             coinIcon.GetComponent<Image>().sprite=Resources.Load<Sprite>("ClassicUI/Coin");Place(coinIcon.GetComponent<RectTransform>(),92,28,8,8);
         }
