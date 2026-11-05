@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: MusicManager
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6bdb7684e14e61be22f98e8155f4af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarioBros.Sound.MusicManager
+  musicVolume: 0.18
+  fadeInSeconds: 0.25
+  fadeOutSeconds: 0.35
+  tracks:
+  - sceneName: TitleScreen
+    clip: {fileID: 8300000, guid: 2c32a8c440c04663b200bd876d2f28f1, type: 3}
+    loop: 1
+    volume: 1
+    stopWhenLevelEnds: 0
+  - sceneName: SampleScene
+    clip: {fileID: 8300000, guid: ee1f08c2b9244dc4ab50b4d1ed6b2dee, type: 3}
+    loop: 1
+    volume: 1
+    stopWhenLevelEnds: 1
+  - sceneName: Underground
+    clip: {fileID: 8300000, guid: 7d706f9e6a41451a92b36b298d8ad673, type: 3}
+    loop: 1
+    volume: 1
+    stopWhenLevelEnds: 1
+  - sceneName: Underwater
+    clip: {fileID: 8300000, guid: 934d184b29aa49788ef1148198ac886f, type: 3}
+    loop: 1
+    volume: 1
+    stopWhenLevelEnds: 1
+  - sceneName: GameOver
+    clip: {fileID: 8300000, guid: 7317be26b29c45f692d5f99f3564e77a, type: 3}
+    loop: 0
+    volume: 1
+    stopWhenLevelEnds: 0

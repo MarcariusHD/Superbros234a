@@ -88,6 +88,17 @@ namespace MarioBros.Player
         private Collider2D supportCollider;
         private bool swimRequested;
         [SerializeField] private bool underwater;
+        /// <summary>Habilita el nado por zonas para el Mundo 1-4.</summary>
+        public void SetUnderwater(bool value)
+        {
+            if (underwater == value) return;
+            underwater = value;
+            swimRequested = false;
+            isJumping = false;
+            supportCollider = null;
+            isGrounded = false;
+            if (rb != null) rb.gravityScale = value ? .45f : gravityScale;
+        }
         public bool IsUnderwater => underwater;
         public bool IsCrouching => playerHealth != null && playerHealth.IsCrouching;
 
@@ -169,6 +180,7 @@ namespace MarioBros.Player
             CheckGrounded();
             if (underwater && swimRequested)
             {
+                MarioBros.Sound.SfxPlayer.Play("stompswim");
                 swimRequested = false;
                 isGrounded = false;
                 supportCollider = null;
@@ -219,6 +231,7 @@ namespace MarioBros.Player
             // Inicio del salto al presionar Espacio estando en el suelo
             if (MarioInput.JumpDown && isGrounded)
             {
+                MarioBros.Sound.SfxPlayer.Play(playerHealth != null && playerHealth.IsBig ? "jump" : "jumpsmall");
                 isJumping = true;
                 ignoreGroundUntil = Time.time + .12f;
                 jumpTimeCounter = maxJumpTime;

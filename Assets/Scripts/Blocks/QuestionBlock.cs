@@ -74,8 +74,6 @@ namespace MarioBros.Blocks
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (isHit) return;
-
             // Verificar si quien colisiona es Mario
             if (!collision.gameObject.CompareTag("Player") && collision.gameObject.GetComponent<PlayerMovement>() == null)
             {
@@ -114,7 +112,7 @@ namespace MarioBros.Blocks
         /// </summary>
         public void Hit(PlayerHealth playerHealth)
         {
-            if (isHit) return;
+            if (isHit) { MarioBros.Sound.SfxPlayer.Play("bump"); return; }
             isHit = true;
 
             // Cambiar sprite al estado vacío y desactivar animación de parpadeo de la interrogación
@@ -129,10 +127,7 @@ namespace MarioBros.Blocks
             }
 
             // Sonido de golpe
-            if (bumpSound != null)
-            {
-                AudioSource.PlayClipAtPoint(bumpSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("bump", bumpSound);
 
             // Iniciar animación de rebote
             if (!isBumping)
@@ -244,10 +239,7 @@ namespace MarioBros.Blocks
                     break;
             }
 
-            if (spawnType != QuestionBlockContent.Coin && powerupSpawnSound != null)
-            {
-                AudioSource.PlayClipAtPoint(powerupSpawnSound, transform.position);
-            }
+            
         }
     }
 }

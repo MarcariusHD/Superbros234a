@@ -117,6 +117,7 @@ namespace MarioBros.Player
         {
             // Si ya está muerto o es invencible, ignorar daño
             if (isDead || isInvincible) return;
+            if (IsBig) MarioBros.Sound.SfxPlayer.Play("pipepowerdown");
 
             switch (currentPowerState)
             {
@@ -245,6 +246,7 @@ namespace MarioBros.Player
         /// <param name="newState">Nuevo estado de poder.</param>
         public void PowerUp(PowerState newState)
         {
+            MarioBros.Sound.SfxPlayer.Play("powerup");
             SetPowerState(newState);
         }
 
@@ -312,6 +314,8 @@ namespace MarioBros.Player
             if (isDead) return;
 
             isDead = true;
+            if (MarioBros.Sound.MusicManager.Instance != null) MarioBros.Sound.MusicManager.Instance.StopImmediate();
+            MarioBros.Sound.SfxPlayer.Play("death");
 
             // Detener cualquier efecto de invencibilidad en curso y restaurar opacidad
             if (invincibilityCoroutine != null)
@@ -360,7 +364,8 @@ namespace MarioBros.Player
 
         private IEnumerator DeathReloadRoutine()
         {
-            yield return new WaitForSeconds(deathDelay);
+            var deathSound = MarioBros.Sound.SfxPlayer.GetClip("death");
+            yield return new WaitForSeconds(Mathf.Max(deathDelay, deathSound != null ? deathSound.length + .1f : 0));
             if (UI.GameManager.Instance == null)
                 new GameObject("GameManager").AddComponent<UI.GameManager>();
             UI.GameManager.Instance.LoseLife();

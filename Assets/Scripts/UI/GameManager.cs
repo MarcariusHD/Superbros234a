@@ -24,6 +24,7 @@ namespace MarioBros.UI
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
+        public bool HasCoinAudio => MarioBros.Sound.SfxPlayer.GetClip("coin") != null || (coinSound != null && audioSource != null);
 
         [Header("Configuración Inicial")]
         [Tooltip("Cantidad de vidas iniciales de Mario.")]
@@ -114,9 +115,9 @@ namespace MarioBros.UI
             {
                 ResetTimer();
                 SetState(GameState.Playing);
-                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : null;
+                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : scene.name == "World1_4" ? "1-4" : null;
                 if (world != null) LastWorld = world;
-                if (world != null && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
+                if (world != null && scene.name != "World1_4" && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
                     StartCoroutine(LevelIntroduction(world));
             }
         }
@@ -193,10 +194,7 @@ namespace MarioBros.UI
             Coins++;
             AddScore(200);
 
-            if (coinSound != null && audioSource != null)
-            {
-                audioSource.PlayOneShot(coinSound);
-            }
+            MarioBros.Sound.SfxPlayer.Play("coin", coinSound);
 
             if (Coins >= 100)
             {
@@ -213,10 +211,7 @@ namespace MarioBros.UI
         public void AddLife()
         {
             Lives++;
-            if (oneUpSound != null && audioSource != null)
-            {
-                audioSource.PlayOneShot(oneUpSound);
-            }
+            MarioBros.Sound.SfxPlayer.Play("1up", oneUpSound);
             OnLivesChanged?.Invoke(Lives);
         }
 
@@ -249,6 +244,7 @@ namespace MarioBros.UI
             if (TimeRemaining > 0)
             {
                 TimeRemaining--;
+                if (TimeRemaining == 100) MarioBros.Sound.SfxPlayer.Play("hurryup");
                 OnTimerChanged?.Invoke(TimeRemaining);
 
                 if (TimeRemaining == 0)
@@ -333,10 +329,7 @@ namespace MarioBros.UI
             SetState(GameState.GameOver);
             isTimerRunning = false;
 
-            if (gameOverSound != null && audioSource != null)
-            {
-                audioSource.PlayOneShot(gameOverSound);
-            }
+            
             Time.timeScale = 1f;
             if (Application.CanStreamedLevelBeLoaded("GameOver"))
                 SceneManager.LoadScene("GameOver");

@@ -195,10 +195,7 @@ namespace MarioBros.Level
             }
 
             // Reproducir sonido
-            if (pipeWarpSound != null)
-            {
-                AudioSource.PlayClipAtPoint(pipeWarpSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("pipepowerdown", pipeWarpSound);
 
             // Deslizar a Mario hacia el interior de la tubería
             Vector3 startPos = player.transform.position;
@@ -273,10 +270,7 @@ namespace MarioBros.Level
             player.transform.position = startPos;
 
             // Reproducir sonido al salir
-            if (pipeWarpSound != null)
-            {
-                AudioSource.PlayClipAtPoint(pipeWarpSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("pipepowerdown", pipeWarpSound);
 
             float elapsed = 0f;
             while (elapsed < slideDuration)

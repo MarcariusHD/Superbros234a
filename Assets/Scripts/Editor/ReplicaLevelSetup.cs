@@ -151,7 +151,7 @@ public static class ReplicaLevelSetup
                 SwimEnemy("Blooper", p, true, root);
             for (int x = 65; x < 185; x += 13)
                 SwimEnemy("CheepCheep", new Vector2(x, 4 + x % 6), false, root);
-            Exit(new Vector2(188.7f,7), "World2_3Pending", false);
+            Exit(new Vector2(188.7f,7), "World1_4", false);
         }
         else
         {

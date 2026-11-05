@@ -78,10 +78,7 @@ namespace MarioBros.Items
 
             transform.position = blockPosition;
 
-            if (spawnSound != null)
-            {
-                AudioSource.PlayClipAtPoint(spawnSound, blockPosition);
-            }
+            MarioBros.Sound.SfxPlayer.Play("item", spawnSound);
 
             Vector3 startPos = blockPosition;
             Vector3 endPos = blockPosition + new Vector3(0f, riseDistance, 0f);
@@ -171,10 +168,7 @@ namespace MarioBros.Items
             }
 
             // Reproducir sonido
-            if (starSound != null)
-            {
-                AudioSource.PlayClipAtPoint(starSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("powerup", starSound);
 
             Destroy(gameObject);
         }

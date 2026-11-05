@@ -286,6 +286,7 @@ namespace MarioBros.Enemies
         /// <param name="player">GameObject del jugador.</param>
         protected virtual void BouncePlayer(GameObject player)
         {
+            MarioBros.Sound.SfxPlayer.Play("stompswim");
             Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
             if (playerRb != null)
             {
@@ -327,6 +328,7 @@ namespace MarioBros.Enemies
         public virtual void Die(Vector2 hitDirection)
         {
             if (!isAlive) return;
+            MarioBros.Sound.SfxPlayer.Play("kickkill");
             isAlive = false;
 
             if (col != null) col.enabled = false;

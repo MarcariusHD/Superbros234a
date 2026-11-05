@@ -48,20 +48,26 @@ save('Font', font)
 
 for name, x, y in [('Title', 0, 192), ('LevelIntro', 0, 460), ('TimeUp', 264, 460), ('GameOver', 528, 460)]:
     image = sheet.crop((x, y, x + 256, y + 240))
-    background = (146, 144, 255, 255) if name == 'Title' else (0, 0, 0, 255)
+    if name == 'Title':
+        sky = image.getpixel((0, 0))
+        image.putdata([(92, 148, 252, 255) if p == sky else p for p in image.getdata()])
+    background = (92, 148, 252, 255) if name == 'Title' else (0, 0, 0, 255)
     image.paste(background, (0, 0, 256, 32))
     if name == 'Title':
-        for rect in [(72, 144, 80, 152), (72, 160, 80, 168), (128, 184, 176, 192)]:
+        for rect in [(72, 144, 80, 152), (72, 160, 80, 168), (128, 184, 184, 192)]:
             image.paste(background, rect)
+        image.paste(background, (88, 144, 200, 168))
+        image.paste(background, (72, 184, 128, 192))
     elif name == 'LevelIntro':
         image.paste(background, (80, 76, 176, 96))
-        image.paste(background, (134, 108, 158, 124))
+        image.paste(background, (120, 108, 160, 124))
     else:
         image.paste(background, (96, 108, 168, 120))
+        image.paste(background, (48, 120, 208, 144))
     save(name, image)
 
 for name, y in [('Coin', 156), ('Cursor', 440)]:
     image = sheet.crop((0, y, 8, y + 8))
-    image.putdata([(0, 0, 0, 0) if p[:3] in [(146, 144, 255), (0, 41, 140)] else p for p in image.getdata()])
+    image.putdata([(0, 0, 0, 0) if p[:3] in [(146, 144, 255), (148, 148, 255), (0, 41, 140), (0, 40, 136)] else p for p in image.getdata()])
     save(name, image)
 print('NES UI ready: 41 nonempty glyphs, four screens, coin and cursor.')
