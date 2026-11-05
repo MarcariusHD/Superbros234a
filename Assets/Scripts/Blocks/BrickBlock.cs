@@ -227,6 +227,24 @@ namespace MarioBros.Blocks
         /// </summary>
         private void SpawnDebris()
         {
+            var frames = Resources.LoadAll<Sprite>("ClassicEffects/Brick");
+            if (frames.Length > 0)
+            {
+                bool underground = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Underground";
+                for (int i = 0; i < 4; i++)
+                {
+                    var piece = new GameObject("NES brick fragment");
+                    piece.transform.position = transform.position + new Vector3(i % 2 == 0 ? -.25f : .25f, i < 2 ? .25f : -.25f, 0);
+                    var renderer = piece.AddComponent<SpriteRenderer>();
+                    renderer.sortingLayerID = spriteRenderer.sortingLayerID;
+                    renderer.sortingOrder = spriteRenderer.sortingOrder + 1;
+                    piece.AddComponent<BrickDebris>().Initialize(frames, underground ? 4 : 0, i);
+                    var body = piece.AddComponent<Rigidbody2D>();body.gravityScale = 2.5f;
+                    body.linearVelocity = new Vector2(i % 2 == 0 ? -3 : 3, i < 2 ? 8 : 5);
+                    Destroy(piece, 2f);
+                }
+                return;
+            }
             if (brickPiecePrefab != null)
             {
                 // Posiciones relativas de los 4 fragmentos

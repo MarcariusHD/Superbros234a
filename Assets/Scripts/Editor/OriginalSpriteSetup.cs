@@ -46,7 +46,7 @@ public static class OriginalSpriteSetup
         var sheet = new Texture2D(2,2);
         sheet.LoadImage(File.ReadAllBytes("Assets/SpritesJuego/NES - Super Mario Bros. - Miscellaneous - Title Screen, HUD and Miscellaneous.png"));
         Directory.CreateDirectory("Assets/Resources/ClassicUI");
-        SaveScreen(sheet,"Title",0,192,new Color32(146,144,255,255),true);
+        SaveScreen(sheet,"Title",0,192,new Color32(92,148,252,255),true);
         SaveScreen(sheet,"LevelIntro",0,460,Color.black,false);
         SaveStatus(sheet,"TimeUp",264);
         SaveStatus(sheet,"GameOver",528);
@@ -82,7 +82,7 @@ public static class OriginalSpriteSetup
     }
     private static bool IsSheetBackground(Color color)
     {
-        Color32 c=color;return (c.r==146&&c.g==144&&c.b==255)||(c.r==0&&c.g==41&&c.b==140);
+        Color32 c=color;return (c.r==146&&c.g==144&&c.b==255)||(c.r==148&&c.g==148&&c.b==255)||(c.r==0&&c.g==41&&c.b==140)||(c.r==0&&c.g==40&&c.b==136);
     }
 
     private static void SaveStatus(Texture2D sheet,string name,int x)
@@ -112,14 +112,21 @@ public static class OriginalSpriteSetup
     {
         var texture = new Texture2D(256,240);
         texture.SetPixels(sheet.GetPixels(x,sheet.height-y-240,256,240));
+        if (title)
+        {
+            var pixels=texture.GetPixels();Color32 sky=texture.GetPixel(0,239);
+            for(int i=0;i<pixels.Length;i++)
+            { Color32 c=pixels[i];if(c.r==sky.r&&c.g==sky.g&&c.b==sky.b) pixels[i]=background; }
+            texture.SetPixels(pixels);
+        }
         // Remove the sheet's colored variable placeholders; draw live values in the UI.
         ClearRect(texture,0,0,256,32,background);
         if (title)
         {
             ClearRect(texture,72,144,8,8,background);ClearRect(texture,72,160,8,8,background);
-            ClearRect(texture,128,184,48,8,background);
+            ClearRect(texture,128,184,56,8,background);
         }
-        else { ClearRect(texture,80,76,96,20,background);ClearRect(texture,134,108,24,16,background); }
+        else { ClearRect(texture,80,76,96,20,background);ClearRect(texture,120,108,40,16,background); }
         texture.Apply();File.WriteAllBytes("Assets/Resources/ClassicUI/"+name+".png",texture.EncodeToPNG());
         Object.DestroyImmediate(texture);
     }

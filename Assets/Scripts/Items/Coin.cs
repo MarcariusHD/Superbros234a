@@ -48,6 +48,9 @@ namespace MarioBros.Items
             spriteRenderer = GetComponent<SpriteRenderer>();
             col = GetComponent<Collider2D>();
             initialScale = transform.localScale;
+            animationFrames = Resources.LoadAll<Sprite>("ClassicEffects/Coin");
+            if (animationFrames.Length > 0 && spriteRenderer != null)
+                spriteRenderer.sprite = animationFrames[0];
 
             // Asegurar que el collider sea de tipo Trigger para recolección
             if (col != null)
@@ -66,7 +69,7 @@ namespace MarioBros.Items
                 animationTimer += Time.deltaTime;
                 if (animationTimer >= 1f / frameRate)
                 {
-                    animationTimer = 0f;
+                    animationTimer %= 1f / frameRate;
                     currentFrameIndex = (currentFrameIndex + 1) % animationFrames.Length;
                     spriteRenderer.sprite = animationFrames[currentFrameIndex];
                 }
@@ -74,7 +77,7 @@ namespace MarioBros.Items
             else
             {
                 // Animación procedimental simple oscilando la escala en X para simular rotación 2D
-                float scaleX = Mathf.Abs(Mathf.Sin(Time.time * proceduralSpinSpeed));
+                float scaleX = Mathf.Max(.25f, Mathf.Abs(Mathf.Sin(Time.time * proceduralSpinSpeed)));
                 transform.localScale = new Vector3(scaleX * initialScale.x, initialScale.y, initialScale.z);
             }
         }
@@ -154,9 +157,7 @@ namespace MarioBros.Items
                 float yOffset = Mathf.Sin(t * Mathf.PI) * height;
                 transform.position = startPosition + new Vector3(0f, yOffset, 0f);
 
-                // Rotación visual durante el salto
-                float scaleX = Mathf.Abs(Mathf.Sin(Time.time * 15f));
-                transform.localScale = new Vector3(scaleX * initialScale.x, initialScale.y, initialScale.z);
+                // Sprite frames handle spinning without shrinking the collider or fighting Update.
 
                 elapsed += Time.deltaTime;
                 yield return null;
