@@ -264,6 +264,7 @@ namespace MarioBros.Enemies
         /// <param name="kickDirection">Dirección horizontal del impulso.</param>
         public void KickShell(Vector2 kickDirection)
         {
+            MarioBros.Sound.SfxPlayer.Play("kickkill");
             if (wakeUpCoroutine != null)
             {
                 StopCoroutine(wakeUpCoroutine);

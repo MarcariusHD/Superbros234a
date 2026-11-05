@@ -89,6 +89,7 @@ public static class OriginalSpriteSetup
     {
         var texture=new Texture2D(256,240);texture.SetPixels(sheet.GetPixels(x,sheet.height-460-240,256,240));
         ClearRect(texture,0,0,256,32,Color.black);ClearRect(texture,96,108,72,12,Color.black);
+        ClearRect(texture,48,120,160,24,Color.black);
         texture.Apply();File.WriteAllBytes("Assets/Resources/ClassicUI/"+name+".png",texture.EncodeToPNG());Object.DestroyImmediate(texture);
     }
     private static void ExtractPoses()
@@ -125,6 +126,7 @@ public static class OriginalSpriteSetup
         {
             ClearRect(texture,72,144,8,8,background);ClearRect(texture,72,160,8,8,background);
             ClearRect(texture,128,184,56,8,background);
+            ClearRect(texture,88,144,112,24,background);ClearRect(texture,72,184,56,8,background);
         }
         else { ClearRect(texture,80,76,96,20,background);ClearRect(texture,120,108,40,16,background); }
         texture.Apply();File.WriteAllBytes("Assets/Resources/ClassicUI/"+name+".png",texture.EncodeToPNG());

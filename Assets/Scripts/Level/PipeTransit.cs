@@ -22,6 +22,7 @@ namespace MarioBros.Level
         }
         public IEnumerator Enter(Vector3 mouth,bool down)
         {
+            MarioBros.Sound.SfxPlayer.Play("pipepowerdown");
             if(down) player.transform.position=new Vector3(mouth.x,player.transform.position.y,0);
             animation.SetScriptedPose(down?"pipe":"walk");
             float distance=down?sprite.bounds.size.y+.25f:sprite.bounds.size.x+1;
@@ -29,6 +30,7 @@ namespace MarioBros.Level
         }
         public IEnumerator Emerge(Vector3 finalPosition)
         {
+            MarioBros.Sound.SfxPlayer.Play("pipepowerdown");
             animation.SetScriptedPose("pipe");
             yield return Slide(finalPosition-Vector3.up*(sprite.bounds.size.y+.25f),finalPosition);
         }

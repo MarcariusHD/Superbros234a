@@ -52,11 +52,35 @@ namespace MarioBros.Blocks
 
         private void Awake()
         {
+            SeparateFlag();
             Collider2D col = GetComponent<Collider2D>();
             if (col != null)
             {
                 col.isTrigger = true;
             }
+        }
+
+        private void SeparateFlag()
+        {
+            var poleSprite=Resources.Load<Sprite>("ClassicFlag/Pole");
+            var bannerSprite=Resources.Load<Sprite>("ClassicFlag/Banner");
+            if(poleSprite==null||bannerSprite==null||flagTransform==null)return;
+            var root=flagTransform.parent;
+            foreach(var renderer in root.GetComponentsInChildren<SpriteRenderer>())
+            {
+                Vector3 p=renderer.transform.position;
+                if(renderer.name.StartsWith("Overworld_")&&p.x>=197&&p.x<=199&&p.y>3&&p.y<13)
+                    renderer.enabled=false;
+            }
+            var mast=new GameObject("Fixed flag mast");mast.transform.SetParent(root,false);
+            mast.transform.position=new Vector3(198,8,0);
+            var fixedRenderer=mast.AddComponent<SpriteRenderer>();fixedRenderer.sprite=poleSprite;
+            fixedRenderer.sortingLayerName="Background";fixedRenderer.sortingOrder=1;
+            var banner=new GameObject("Complete moving flag");banner.transform.SetParent(root,false);
+            banner.transform.position=new Vector3(198,11,0);
+            var moving=banner.AddComponent<SpriteRenderer>();moving.sprite=bannerSprite;
+            moving.sortingLayerName="Background";moving.sortingOrder=2;
+            flagTransform=banner.transform;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -110,21 +134,20 @@ namespace MarioBros.Blocks
                 GameManager.Instance.AddScore(points);
             }
 
+            if (MarioBros.Sound.MusicManager.Instance != null) MarioBros.Sound.MusicManager.Instance.StopImmediate();
             // Reproducir sonido de deslizamiento
-            if (flagSlideSound != null)
-            {
-                AudioSource.PlayClipAtPoint(flagSlideSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("flagpole", flagSlideSound);
 
             // Posicionar a Mario pegado al lado izquierdo del asta
             float poleX = transform.position.x;
             playerObj.transform.position = new Vector3(poleX - 0.25f, contactY, playerObj.transform.position.z);
 
             float bottomY = poleBottom != null ? poleBottom.position.y : transform.position.y;
-            float flagBottomY = bottomY + 0.5f;
+            float flagBottomY = bottomY + 1f;
 
             // Secuencia de descenso sincronizado de Mario y la Bandera
-            while (playerObj.transform.position.y > bottomY + 0.05f)
+            while (playerObj.transform.position.y > bottomY + 0.05f ||
+                (flagTransform != null && flagTransform.position.y > flagBottomY + .01f))
             {
                 // Bajar Mario
                 Vector3 playerPos = playerObj.transform.position;
@@ -150,10 +173,7 @@ namespace MarioBros.Blocks
             playerObj.transform.position = new Vector3(poleX + 0.35f, bottomY, playerObj.transform.position.z);
 
             // Música de victoria
-            if (levelCompleteMusic != null)
-            {
-                AudioSource.PlayClipAtPoint(levelCompleteMusic, transform.position);
-            }
+            
 
             yield return new WaitForSeconds(0.4f);
 

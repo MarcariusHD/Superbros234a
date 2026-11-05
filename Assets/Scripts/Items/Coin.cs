@@ -109,10 +109,7 @@ namespace MarioBros.Items
             }
 
             // Reproducir sonido en la posición actual
-            if (collectSound != null)
-            {
-                AudioSource.PlayClipAtPoint(collectSound, transform.position);
-            }
+            
 
             // Disparar evento para observadores
             OnCoinCollected?.Invoke(this);
@@ -138,10 +135,7 @@ namespace MarioBros.Items
             float height = 2.2f;
             float elapsed = 0f;
 
-            if (collectSound != null)
-            {
-                AudioSource.PlayClipAtPoint(collectSound, startPosition);
-            }
+            
 
             if (GameManager.Instance != null)
             {

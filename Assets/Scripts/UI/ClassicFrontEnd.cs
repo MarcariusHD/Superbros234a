@@ -21,6 +21,9 @@ namespace MarioBros.UI
             mario.GetComponent<Image>().sprite=Resources.Load<Sprite>("MarioFrames/Small_Idle");
             Place(mario.GetComponent<RectTransform>(),48,200,16,16);
             Hud(root,"1-1",0,0,400);
+            Label(root,"1 JUGADOR",124,148,112,8,8);
+            Label(root,"2 JUGADORES",132,164,112,8,8);
+            Label(root,"RECORD",96,188,48,8,8);
             var button = new GameObject("Start game",typeof(RectTransform),typeof(Image),typeof(Button));
             button.transform.SetParent(root,false);
             Place(button.GetComponent<RectTransform>(),128,148,192,24);
@@ -55,6 +58,7 @@ namespace MarioBros.UI
         {
             var holder=new GameObject(name+" NES");var root=Screen(name,holder.transform);
             Hud(root,world,GameManager.Score,GameManager.Coins,GameManager.TimeRemaining);
+            Label(root,name=="GameOver"?"FIN DEL JUEGO":"TIEMPO AGOTADO",128,132,200,16,8);
             if(name=="GameOver") Label(root,"PRESS START",128,184,180,16,8);
             return holder;
         }

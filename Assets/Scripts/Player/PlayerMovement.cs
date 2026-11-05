@@ -169,6 +169,7 @@ namespace MarioBros.Player
             CheckGrounded();
             if (underwater && swimRequested)
             {
+                MarioBros.Sound.SfxPlayer.Play("stompswim");
                 swimRequested = false;
                 isGrounded = false;
                 supportCollider = null;
@@ -219,6 +220,7 @@ namespace MarioBros.Player
             // Inicio del salto al presionar Espacio estando en el suelo
             if (MarioInput.JumpDown && isGrounded)
             {
+                MarioBros.Sound.SfxPlayer.Play(playerHealth != null && playerHealth.IsBig ? "jump" : "jumpsmall");
                 isJumping = true;
                 ignoreGroundUntil = Time.time + .12f;
                 jumpTimeCounter = maxJumpTime;

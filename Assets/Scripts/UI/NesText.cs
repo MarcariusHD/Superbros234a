@@ -12,7 +12,10 @@ namespace MarioBros.UI
         private readonly List<RawImage> glyphs = new List<RawImage>();
         public float pixelSize = 8;
         public RectTransform rectTransform => (RectTransform)transform;
-        public string Text { get => value; set { if(this.value==value)return;this.value=value??"";Refresh(); } }
+        public string Text { get => value; set { var translated=Spanish(value??"");if(this.value==translated)return;this.value=translated;Refresh(); } }
+        private static string Spanish(string text) => text.Replace("COINS","MONEDAS").Replace("WORLD","MUNDO")
+            .Replace("LIVES","VIDAS").Replace("TIME UP","TIEMPO AGOTADO").Replace("TIME","TIEMPO")
+            .Replace("GAME OVER","FIN DEL JUEGO").Replace("PRESS START","PULSA ENTER");
         private void Awake()
         {
             var sprite=Resources.Load<Sprite>("ClassicUI/Font");

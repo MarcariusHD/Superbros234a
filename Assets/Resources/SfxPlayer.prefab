@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: SfxPlayer
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f574c3108a05488581be38acb46e9d43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarioBros.Sound.SfxPlayer
+  clips:
+  - {fileID: 8300000, guid: 739133f741194f789546305531aaaebc, type: 3}
+  - {fileID: 8300000, guid: 730249645bf343d1beb5d57738286adc, type: 3}
+  - {fileID: 8300000, guid: d9630e56fec042c9a9c2d041288d0c60, type: 3}
+  - {fileID: 8300000, guid: a549c07f1be64f238588a5cd39be6569, type: 3}
+  - {fileID: 8300000, guid: 4f42ad3b8b094c2daad5b19f4f4c95f6, type: 3}
+  - {fileID: 8300000, guid: 48441628d56d4abf850eb9271721d18c, type: 3}
+  - {fileID: 8300000, guid: 51be7b303d994ea9944f913b47fd6c06, type: 3}
+  - {fileID: 8300000, guid: 353ca749806b419ca2e95da0d771f11f, type: 3}
+  - {fileID: 8300000, guid: 11523b7310ee41018ef84dc7c31df286, type: 3}
+  - {fileID: 8300000, guid: 9d9d9a14156042899417dd414b8f4c74, type: 3}
+  - {fileID: 8300000, guid: 1a2c52a8acb84ce196b889059b952116, type: 3}
+  - {fileID: 8300000, guid: 42c38f47867c457fb62bf6f039b11876, type: 3}
+  - {fileID: 8300000, guid: 2338ac4b8fb24c51822b5badf245edd5, type: 3}
+  - {fileID: 8300000, guid: 394832d9142447568acc42c19113aace, type: 3}
+  - {fileID: 8300000, guid: e8561e2f53fa41829e637b8d1fb7bedf, type: 3}
+  - {fileID: 8300000, guid: 6bfd631b2d0e4d6196de726e9128627d, type: 3}
+  - {fileID: 8300000, guid: 0304d24128064ac186f249e55da4d278, type: 3}
+  - {fileID: 8300000, guid: a6b980a243064d71bed0112affc41d68, type: 3}
+  - {fileID: 8300000, guid: 45f7137f7a0d481dbe687b34184ec2d0, type: 3}
+  - {fileID: 8300000, guid: 38bb712fea0046ff95284781eb5af301, type: 3}
+  - {fileID: 8300000, guid: 845136fb4755488fb48341edfcc33748, type: 3}
+  - {fileID: 8300000, guid: cf461fce543c48f8aa1680ae826c40bd, type: 3}
+  - {fileID: 8300000, guid: 5115c9d261924dc8a611d306bcb11362, type: 3}

@@ -56,11 +56,14 @@ for name, x, y in [('Title', 0, 192), ('LevelIntro', 0, 460), ('TimeUp', 264, 46
     if name == 'Title':
         for rect in [(72, 144, 80, 152), (72, 160, 80, 168), (128, 184, 184, 192)]:
             image.paste(background, rect)
+        image.paste(background, (88, 144, 200, 168))
+        image.paste(background, (72, 184, 128, 192))
     elif name == 'LevelIntro':
         image.paste(background, (80, 76, 176, 96))
         image.paste(background, (120, 108, 160, 124))
     else:
         image.paste(background, (96, 108, 168, 120))
+        image.paste(background, (48, 120, 208, 144))
     save(name, image)
 
 for name, y in [('Coin', 156), ('Cursor', 440)]:

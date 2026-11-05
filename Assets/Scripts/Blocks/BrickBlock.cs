@@ -146,7 +146,7 @@ namespace MarioBros.Blocks
                 }
             }
 
-            Bump();
+            Bump(false);
 
             // Si se agotaron las monedas, se convierte en bloque usado
             if (coinCount <= 0)
@@ -162,12 +162,9 @@ namespace MarioBros.Blocks
         /// <summary>
         /// Realiza la animación de rebote hacia arriba y abajo.
         /// </summary>
-        private void Bump()
+        private void Bump(bool playSound = true)
         {
-            if (bumpSound != null)
-            {
-                AudioSource.PlayClipAtPoint(bumpSound, transform.position);
-            }
+            if (playSound) MarioBros.Sound.SfxPlayer.Play("bump", bumpSound);
 
             if (!isBumping && gameObject.activeInHierarchy)
             {
@@ -205,10 +202,7 @@ namespace MarioBros.Blocks
         {
             isBroken = true;
 
-            if (breakSound != null)
-            {
-                AudioSource.PlayClipAtPoint(breakSound, transform.position);
-            }
+            MarioBros.Sound.SfxPlayer.Play("brick", breakSound);
 
             if (GameManager.Instance != null)
             {
