@@ -72,7 +72,7 @@ namespace MarioBros.UI
         private static void Hud(Transform root,string world,int score,int coins,int time)
         {
             Label(root,"MARIO\n"+score.ToString("D6"),48,24,88,28,8);
-            Label(root,"x"+coins.ToString("D2"),104,27,40,18,8);
+            Label(root,"x"+coins.ToString("D2"),108,28,40,18,8);
             Label(root,"WORLD\n"+world,164,24,60,28,8);
             Label(root,"TIME\n"+time.ToString("D3"),220,24,60,28,8);
             var coinIcon=new GameObject("HUD coin",typeof(RectTransform),typeof(Image));coinIcon.transform.SetParent(root,false);
