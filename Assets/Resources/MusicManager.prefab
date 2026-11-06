@@ -49,7 +49,7 @@ MonoBehaviour:
     volume: 1
     stopWhenLevelEnds: 0
   - sceneName: SampleScene
-    clip: {fileID: 8300000, guid: ee1f08c2b9244dc4ab50b4d1ed6b2dee, type: 3}
+    clip: {fileID: 8300000, guid: 76cdc064c49740338c2a21912b663d64, type: 3}
     loop: 1
     volume: 1
     stopWhenLevelEnds: 1

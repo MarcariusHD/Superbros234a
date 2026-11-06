@@ -148,6 +148,8 @@ namespace MarioBros.Enemies
 
             // Chequeo complementario por componente PlayerHealth o Tag "Player"
             GameObject player = GameObject.FindGameObjectWithTag("Player");
+            foreach(var candidate in Player.CoopSession.Players)
+                if(candidate!=null&&Vector2.Distance(transform.position,candidate.transform.position)<=playerDetectionRadius)return true;
             if (player != null)
             {
                 float distance = Vector2.Distance(transform.position, player.transform.position);

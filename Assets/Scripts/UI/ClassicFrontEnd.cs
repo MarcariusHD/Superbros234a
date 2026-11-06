@@ -10,6 +10,8 @@ namespace MarioBros.UI
     public class ClassicFrontEnd : MonoBehaviour
     {
         private bool starting;
+        private int selection;
+        private RectTransform menuCursor;
         private void Start()
         {
             Time.timeScale = 1;
@@ -26,23 +28,36 @@ namespace MarioBros.UI
             Label(root,"RECORD",96,188,48,8,8);
             var button = new GameObject("Start game",typeof(RectTransform),typeof(Image),typeof(Button));
             button.transform.SetParent(root,false);
-            Place(button.GetComponent<RectTransform>(),128,148,192,24);
+            Place(button.GetComponent<RectTransform>(),128,148,192,16);
             button.GetComponent<Image>().color = new Color(0,0,0,0);
-            button.GetComponent<Button>().onClick.AddListener(Begin);
+            button.GetComponent<Button>().navigation=new Navigation { mode=Navigation.Mode.None };
+            button.GetComponent<Button>().onClick.AddListener(()=>{selection=0;Begin();});
+            var second=Instantiate(button,root);second.name="Start cooperative game";
+            Place(second.GetComponent<RectTransform>(),128,164,192,16);
+            second.GetComponent<Button>().onClick.RemoveAllListeners();
+            second.GetComponent<Button>().onClick.AddListener(()=>{selection=1;Begin();});
             Label(root,"000000",152,188,48,8,8);
             var cursor=new GameObject("Menu cursor",typeof(RectTransform),typeof(Image));cursor.transform.SetParent(root,false);
             cursor.GetComponent<Image>().sprite=Resources.Load<Sprite>("ClassicUI/Cursor");Place(cursor.GetComponent<RectTransform>(),76,148,8,8);
+            menuCursor=cursor.GetComponent<RectTransform>();
             if (EventSystem.current == null)
                 new GameObject("Title input",typeof(EventSystem),typeof(InputSystemUIInputModule));
         }
         private void Update()
         {
+            var keyboard=Keyboard.current;
+            if(keyboard!=null&&(keyboard.upArrowKey.wasPressedThisFrame||keyboard.downArrowKey.wasPressedThisFrame))
+            {
+                selection=1-selection;Place(menuCursor,76,148+selection*16,8,8);
+                Sound.SfxPlayer.Play("beep");
+            }
             if (MarioInput.JumpDown || (Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)) Begin();
         }
         public void Begin()
         {
             if (starting) return;
             starting = true;
+            Player.CoopSession.TwoPlayers=selection==1;
             GameManager.Instance.RestartGame();
         }
         public static GameObject ShowIntro(string world)
@@ -52,6 +67,12 @@ namespace MarioBros.UI
             Hud(root,world,GameManager.Score,GameManager.Coins,GameManager.TimeRemaining);
             Label(root,"WORLD " + world,128,84,180,20,10);
             Label(root,"x " + GameManager.Lives,136,116,48,18,8);
+            if(Player.CoopSession.TwoPlayers)
+            {
+                var luigi=new GameObject("Luigi introduction",typeof(RectTransform),typeof(Image));luigi.transform.SetParent(root,false);
+                luigi.GetComponent<Image>().sprite=Resources.Load<Sprite>("CoopFrames/Luigi/Small_Idle");
+                Place(luigi.GetComponent<RectTransform>(),88,116,16,16);
+            }
             return holder;
         }
         public static GameObject ShowStatus(string name,string world)

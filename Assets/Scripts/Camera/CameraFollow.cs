@@ -85,6 +85,8 @@ namespace MarioBros.CameraControl
             // Calcular la posición objetivo en X manteniendo a Mario a la izquierda del centro
             // Al sumar offsetX, el centro de la cámara se coloca por delante de Mario
             float targetX = target.position.x + offsetX;
+            if(Player.CoopSession.TwoPlayers&&!Player.CoopSession.Transitioning)
+                targetX=Player.CoopSession.RearX(target.position.x)+offsetX;
 
             // Si solo se permite avanzar a la derecha, el objetivo nunca puede ser menor a la posición más avanzada alcanzada
             if (onlyScrollRight)

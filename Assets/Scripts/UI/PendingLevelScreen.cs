@@ -9,6 +9,10 @@ namespace MarioBros.UI
         private bool leaving;
         private void Start()
         {
+            if(Application.CanStreamedLevelBeLoaded("World2_3"))
+            {
+                SceneManager.LoadScene("World2_3");return;
+            }
             Time.timeScale = 1;
             if (GameManager.Instance != null) GameManager.Instance.LevelCompleted();
         }

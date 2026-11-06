@@ -25,6 +25,7 @@ public static class ReplicaLevelSetup
 
     [MenuItem("Tools/Mario/Build Underground, Underwater and Game Over")]
     [MenuItem("Tools/Mario/Rebuild All Levels (1-1, 1-2, 2-2)")]
+    [MenuItem("Tools/Mario/Rebuild All Levels (1-1, 1-2, 2-2, 2-3)")]
     public static void Build()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -43,9 +44,9 @@ public static class ReplicaLevelSetup
         BuildLevel(true);
         BuildOverworld();
         BuildGameOver();
-        BuildPendingLevel();
+        BuildWorld23();
         BuildTitleScreen();
-        var paths = new[] { "TitleScreen", "SampleScene", "Underground", "Underwater", "World2_3Pending", "GameOver" };
+        var paths = new[] { "TitleScreen", "SampleScene", "Underground", "Underwater", "World2_3", "GameOver" };
         var extras = EditorBuildSettings.scenes.Where(s => !paths.Any(p => s.path == "Assets/Scenes/" + p + ".unity"));
         EditorBuildSettings.scenes = paths.Select(p => new EditorBuildSettingsScene("Assets/Scenes/" + p + ".unity", true)).Concat(extras).ToArray();
         AssetDatabase.SaveAssets();
@@ -151,7 +152,7 @@ public static class ReplicaLevelSetup
                 SwimEnemy("Blooper", p, true, root);
             for (int x = 65; x < 185; x += 13)
                 SwimEnemy("CheepCheep", new Vector2(x, 4 + x % 6), false, root);
-            Exit(new Vector2(188.7f,7), "World2_3Pending", false);
+            Exit(new Vector2(188.7f,7), "World2_3", false);
         }
         else
         {
@@ -170,10 +171,10 @@ public static class ReplicaLevelSetup
             Exit(new Vector2(165.8f,6), "Underwater", false);
             Exit(new Vector2(179,5.1f), "Underwater", true);
             Exit(new Vector2(183,5.1f), "Underground", true);
-            Exit(new Vector2(187,5.1f), "World2_3Pending", true);
+            Exit(new Vector2(187,5.1f), "World2_3", true);
             WorldLabel(root, "2-2", new Vector2(179,6.7f));
             WorldLabel(root, "1-2", new Vector2(183,6.7f));
-            WorldLabel(root, "2-3\nPENDIENTE", new Vector2(187,6.7f));
+            WorldLabel(root, "2-3", new Vector2(187,6.7f));
         }
         BuildHud(water ? "2-2" : "1-2");
         ValidateLevel(name);
@@ -280,20 +281,7 @@ public static class ReplicaLevelSetup
 
     private static void BuildBonusRoom(Transform parent)
     {
-        for(int y=0;y<13;y++) for(int x=0;x<16;x++)
-        {
-            var sprite=Sprite("Assets/Sprites/BonusRoom/Tile_"+x+"_"+y+".png");
-            if(sprite==null)continue;
-            var go=new GameObject("Bonus tile "+x+","+y);go.transform.SetParent(parent);go.transform.position=new Vector3(240+x+.5f,y+.5f,0);
-            var renderer=go.AddComponent<SpriteRenderer>();renderer.sprite=sprite;renderer.sortingLayerName="Ground";
-            bool coin=((y==5||y==7)&&x>=4&&x<=10)||(y==9&&x>=5&&x<=9);
-            if(coin) {go.AddComponent<CircleCollider2D>().radius=.35f;go.AddComponent<Coin>();}
-            else {go.layer=LayerMask.NameToLayer("Ground");go.AddComponent<BoxCollider2D>().size=Vector2.one;}
-        }
-        var entry=new GameObject("Bonus entry - fourth pipe");entry.transform.SetParent(parent);entry.transform.position=new Vector3(58,6.1f,0);
-        var ec=entry.AddComponent<BoxCollider2D>();ec.isTrigger=true;ec.size=new Vector2(1.6f,.4f);entry.AddComponent<BonusPipe>().enterBonus=true;
-        var exit=new GameObject("Bonus exit to pipe 163");exit.transform.SetParent(parent);exit.transform.position=new Vector3(252.8f,3,0);
-        var xc=exit.AddComponent<BoxCollider2D>();xc.isTrigger=true;xc.size=new Vector2(.5f,1.8f);exit.AddComponent<BonusPipe>().enterBonus=false;
+        BonusRoomBuilder.Build(parent);
     }
 
     private static void ValidateLevel(string name)
@@ -316,7 +304,7 @@ public static class ReplicaLevelSetup
         {
             var warps = UnityEngine.Object.FindObjectsByType<LevelExit>(FindObjectsSortMode.None)
                 .Where(e => e.requireDown).OrderBy(e => e.transform.position.x).ToArray();
-            var destinations = new[] {"Underwater","Underground","World2_3Pending"};
+            var destinations = new[] {"Underwater","Underground","World2_3"};
             if (warps.Length != destinations.Length || !warps.Select(e => e.nextScene).SequenceEqual(destinations))
                 throw new InvalidOperationException("Destinos incorrectos en los tres tubos.");
         }
@@ -369,6 +357,23 @@ public static class ReplicaLevelSetup
         text.rectTransform.sizeDelta = new Vector2(3.5f,1.5f);
         text.font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
         text.GetComponent<MeshRenderer>().sortingLayerName = "UI";
+    }
+
+    [MenuItem("Tools/Mario/Build World 2-3")]
+    public static void BuildWorld23()
+    {
+        if(EditorApplication.isPlayingOrWillChangePlaymode)return;
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+        var builder=new GameObject("World 2-3 Underground Course").AddComponent<World23Builder>();
+        builder.goombaPrefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Enemies/Goomba.prefab");
+        builder.koopaPrefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Enemies/Koopa.prefab");
+        builder.coinPrefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Items/Coin.prefab");
+        builder.mushroomPrefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Items/Mushroom.prefab");
+        builder.groundSprite=Sprite(Art+"Underground_0.png");builder.brickSprite=builder.groundSprite;
+        builder.questionSprite=Sprite(Art+"Underground_31.png");
+        builder.emptySprite=Sprite("Assets/Sprites/Block_Empty.png");builder.pipeSprite=Sprite("Assets/Sprites/Pipe.png");
+        builder.liftSprite=Sprite("Assets/Sprites/LiftPlatform.png");
+        EditorSceneManager.SaveScene(SceneManager.GetActiveScene(),"Assets/Scenes/World2_3.unity");
     }
 
     private static void BuildPendingLevel()

@@ -28,9 +28,19 @@ namespace MarioBros.Player
         private bool dead;
         private string scriptedPose;
         private Sprite crouchSprite, smallClimb, bigClimb;
-        public void SetScriptedPose(string pose) { scriptedPose = pose; frameClock = 0; }
+        public void SetScriptedPose(string pose) { if(scriptedPose==pose)return;scriptedPose = pose; frameClock = 0; }
         private float frameClock;
         private bool HasAnimator => animator != null && animator.runtimeAnimatorController != null;
+        private string frameFolder = "MarioFrames/";
+        private void LoadFrames()
+        {
+            smallIdle=Frame("Small_Idle");bigIdle=Frame("Big_Idle");
+            smallJump=Frame("Small_Jump");bigJump=Frame("Big_Jump");deathSprite=Frame("Small_Die");
+            crouchSprite=Frame("Big_Crouch");smallClimb=Frame("Small_Climb");bigClimb=Frame("Big_Climb");
+            smallRun=new[]{Frame("Small_Run1"),Frame("Small_Run2"),Frame("Small_Run3")};
+            bigRun=new[]{Frame("Big_Run1"),Frame("Big_Run2"),Frame("Big_Run3")};
+            smallSwim=new[]{Frame("Small_Swim1"),Frame("Small_Swim2")};bigSwim=new[]{Frame("Big_Swim1"),Frame("Big_Swim2")};
+        }
 
         // Hashes optimizados para los parámetros del Animator
         private static readonly int SpeedHash = Animator.StringToHash("speed");
@@ -158,7 +168,7 @@ namespace MarioBros.Player
         /// </summary>
         public void TriggerShrink()
         {
-            SetBig(false);
+            SetBig(GetComponent<PlayerHealth>()?.IsBig ?? false);
             if (HasAnimator)
             {
                 animator.SetTrigger(ShrinkTriggerHash);
@@ -182,11 +192,15 @@ namespace MarioBros.Player
             }
         }
 
-        private static Sprite Frame(string name) => Resources.Load<Sprite>("MarioFrames/" + name);
+        private Sprite Frame(string name) => Resources.Load<Sprite>(frameFolder + name) ?? Resources.Load<Sprite>("MarioFrames/" + name);
 
         private void UpdateSpriteFrames()
         {
             if (spriteRenderer == null || playerMovement == null) return;
+            bool luigi=(GetComponent<PlayerIdentity>()?.slot??0)==1;
+            bool fire=GetComponent<PlayerHealth>().CurrentPowerState==PowerState.Fire;
+            string folder=fire?(luigi?"CoopFrames/FireLuigi/":"CoopFrames/FireMario/"):(luigi?"CoopFrames/Luigi/":"MarioFrames/");
+            if(folder!=frameFolder){frameFolder=folder;LoadFrames();}
             Sprite next;
             if (dead) next = deathSprite;
             else if (!string.IsNullOrEmpty(scriptedPose))
@@ -201,7 +215,7 @@ namespace MarioBros.Player
                 else next=isBig?bigIdle:smallIdle;
             }
             else if (playerMovement.IsCrouching) next=crouchSprite;
-            else if (playerMovement.IsUnderwater)
+            else if (playerMovement.IsUnderwater && !playerMovement.IsGrounded)
             {
                 frameClock += Time.deltaTime * 5;
                 var frames = isBig ? bigSwim : smallSwim;

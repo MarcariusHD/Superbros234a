@@ -96,6 +96,14 @@ namespace MarioBros.Blocks
 
         private IEnumerator FlagPoleSequenceRoutine(GameObject playerObj, float contactY)
         {
+            CoopSession.BeginTransition();
+            foreach(var partner in CoopSession.Players)
+            {
+                if(partner==null||partner.gameObject==playerObj)continue;
+                partner.GetComponent<Rigidbody2D>().simulated=false;
+                foreach(var partnerCollider in partner.GetComponentsInChildren<Collider2D>())partnerCollider.enabled=false;
+                partner.GetComponent<PlayerAnimation>().SetScriptedPose("climb");
+            }
             // Detener el juego / temporizador en el GameManager
             if (GameManager.Instance != null)
             {
@@ -153,6 +161,7 @@ namespace MarioBros.Blocks
                 Vector3 playerPos = playerObj.transform.position;
                 playerPos.y = Mathf.MoveTowards(playerPos.y, bottomY, slideSpeed * Time.deltaTime);
                 playerObj.transform.position = playerPos;
+                MovePartner(playerObj,"climb");
 
                 // Bajar Bandera
                 if (flagTransform != null && flagTransform.position.y > flagBottomY)
@@ -179,6 +188,7 @@ namespace MarioBros.Blocks
 
             // Caminata hacia el castillo
             if(animation!=null) animation.SetScriptedPose("walk");
+            MovePartner(playerObj,"walk");
             Vector3 targetWalkPos = castleDestination != null ?
                 castleDestination.position :
                 playerObj.transform.position + new Vector3(7f, 0f, 0f);
@@ -191,6 +201,7 @@ namespace MarioBros.Blocks
                     walkSpeed * Time.deltaTime
                 );
                 yield return null;
+                MovePartner(playerObj,"walk");
             }
 
             // Ocultar a Mario al entrar al castillo
@@ -199,11 +210,22 @@ namespace MarioBros.Blocks
             {
                 sr.enabled = false;
             }
+            foreach(var partner in CoopSession.Players)if(partner!=null)partner.GetComponent<SpriteRenderer>().enabled=false;
 
             // Esperar antes de cambiar de escena
             yield return new WaitForSeconds(sceneLoadDelay);
 
             LoadNextLevel();
+        }
+        private static void MovePartner(GameObject leader,string pose)
+        {
+            foreach(var partner in CoopSession.Players)
+            {
+                if(partner==null||partner.gameObject==leader)continue;
+                partner.transform.position=leader.transform.position+Vector3.right*.8f;
+                var animation=partner.GetComponent<PlayerAnimation>();
+                animation.SetScriptedPose(pose);
+            }
         }
 
         /// <summary>

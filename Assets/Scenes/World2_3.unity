@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: World 2-3 Underground Course
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e115d40eb5432cbb6f8e9b9f6f97b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MarioBros.Level.World23Builder
+  goombaPrefab: {fileID: 3608562787267666857, guid: 5c27866491be5d0498ab38a0b6cb33f9, type: 3}
+  koopaPrefab: {fileID: 5241528304068886549, guid: 38b2f002ada5f6c459dba26fefaffa66, type: 3}
+  coinPrefab: {fileID: 4368308202277894057, guid: 826956c97cc76334abaa5d15f65ae8a2, type: 3}
+  mushroomPrefab: {fileID: 3750065652915024339, guid: 184272e32840f67468bc02897ee109a6, type: 3}
+  groundSprite: {fileID: 21300000, guid: f35709c797b9fd54b916808b1cceb686, type: 3}
+  brickSprite: {fileID: 21300000, guid: f35709c797b9fd54b916808b1cceb686, type: 3}
+  questionSprite: {fileID: 21300000, guid: 4493122c4b7fdd1488eb281084f09f36, type: 3}
+  emptySprite: {fileID: 21300000, guid: 4c811cbb29aa05749b4e1a56af15ab36, type: 3}
+  pipeSprite: {fileID: 21300000, guid: 8ffa1bdfc75175c46994dd5dad2212be, type: 3}
+  liftSprite: {fileID: 21300000, guid: 5b31573838dc445428dbcccdadc0038b, type: 3}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 400000}

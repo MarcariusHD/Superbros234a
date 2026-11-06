@@ -142,14 +142,14 @@ namespace MarioBros.Player
 
         private void Update()
         {
-            if (isDead) return;
+            if (isDead || UI.GameManager.CurrentState != UI.GameState.Playing) return;
 
             // 1. Chequeo de caída al vacío
             CheckFallDeath();
 
             // 2. Procesar entrada del jugador (Old Input System con KeyCode)
             ProcessInput();
-            if (playerHealth != null) playerHealth.SetCrouching(MarioInput.Down && !underwater);
+            if (playerHealth != null) playerHealth.SetCrouching(PlayerIdentity.InputFor(this).Down && !underwater);
 
             // 3. Manejo de salto variable
             HandleJump();
@@ -177,11 +177,26 @@ namespace MarioBros.Player
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, 4.5f);
             }
             if (isGrounded) rb.linearVelocity = new Vector2(rb.linearVelocity.x, supportVelocityY);
+            if(isGrounded&&supportCollider!=null)
+            {
+                var platform=supportCollider.GetComponent<Level.HorizontalPlatform>();
+                if(platform!=null)rb.position+=Vector2.right*platform.DeltaX;
+            }
             if (underwater)
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(-2.5f, rb.linearVelocity.y));
 
             // Movimiento horizontal con aceleración y desaceleración
             HandleHorizontalMovement();
+            if(CoopSession.TwoPlayers&&!CoopSession.Transitioning&&Camera.main!=null)
+            {
+                var camera=Camera.main;
+                float half=col.bounds.extents.x;
+                float left=camera.ViewportToWorldPoint(new Vector3(0,0,0)).x+half;
+                float right=camera.ViewportToWorldPoint(new Vector3(1,0,0)).x-half;
+                float predicted=rb.position.x+rb.linearVelocity.x*Time.fixedDeltaTime;
+                if(predicted<left||predicted>right)rb.linearVelocity=new Vector2(0,rb.linearVelocity.y);
+                rb.position=new Vector2(Mathf.Clamp(rb.position.x,left,right),rb.position.y);
+            }
         }
 
         /// <summary>
@@ -191,17 +206,17 @@ namespace MarioBros.Player
         {
             horizontalInput = 0f;
 
-            if (MarioInput.Left)
+            if (PlayerIdentity.InputFor(this).Left)
             {
                 horizontalInput -= 1f;
             }
-            if (MarioInput.Right)
+            if (PlayerIdentity.InputFor(this).Right)
             {
                 horizontalInput += 1f;
             }
 
             // Correr al mantener Shift o tecla de acción
-            isRunning = MarioInput.Run;
+            isRunning = PlayerIdentity.InputFor(this).Run;
         }
 
         /// <summary>
@@ -213,12 +228,12 @@ namespace MarioBros.Player
         {
             if (underwater)
             {
-                if (MarioInput.JumpDown)
+                if (PlayerIdentity.InputFor(this).JumpDown)
                     swimRequested = true;
                 return;
             }
             // Inicio del salto al presionar Espacio estando en el suelo
-            if (MarioInput.JumpDown && isGrounded)
+            if (PlayerIdentity.InputFor(this).JumpDown && isGrounded)
             {
                 MarioBros.Sound.SfxPlayer.Play(playerHealth != null && playerHealth.IsBig ? "jump" : "jumpsmall");
                 isJumping = true;
@@ -229,7 +244,7 @@ namespace MarioBros.Player
             }
 
             // Continuar impulsando mientras se mantenga presionada la tecla Espacio
-            if (MarioInput.JumpHeld && isJumping)
+            if (PlayerIdentity.InputFor(this).JumpHeld && isJumping)
             {
                 if (jumpTimeCounter > 0f)
                 {
@@ -243,7 +258,7 @@ namespace MarioBros.Player
             }
 
             // Al soltar la tecla de salto prematuramente, cortar la velocidad vertical ascendente
-            if (MarioInput.JumpUp)
+            if (PlayerIdentity.InputFor(this).JumpUp)
             {
                 isJumping = false;
                 if (rb.linearVelocity.y > 0f)

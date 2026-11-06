@@ -31,11 +31,16 @@ namespace MarioBros.Enemies
         protected override void Awake()
         {
             base.Awake();
-            string palette = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Underground" ? "Underground" : "Overworld";
+            string palette = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name is "Underground" or "World2_3" ? "Underground" : "Overworld";
             string prefix = "MarioFrames/Goomba_" + palette;
             walkOne = Resources.Load<Sprite>(prefix + "_Walk1");
             walkTwo = Resources.Load<Sprite>(prefix + "_Walk2");
             squishSprite = Resources.Load<Sprite>(prefix + "_Squish");
+            if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="World2_3")
+            {
+                walkOne=Resources.Load<Sprite>("Castle23/Goomba/0");walkTwo=Resources.Load<Sprite>("Castle23/Goomba/1");
+                squishSprite=Resources.Load<Sprite>("Castle23/GoombaSquish");
+            }
             if (spriteRenderer != null) spriteRenderer.color = Color.white;
 
             boxCol = GetComponent<BoxCollider2D>();

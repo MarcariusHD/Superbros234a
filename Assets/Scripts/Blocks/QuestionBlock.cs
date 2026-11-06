@@ -64,6 +64,11 @@ namespace MarioBros.Blocks
         private bool isBumping = false;
 
         public bool IsHit => isHit;
+        public void Configure(GameObject coin,GameObject mushroom,Sprite empty,bool powerup)
+        {
+            coinPrefab=coin;mushroomPrefab=mushroom;emptyBlockSprite=empty;
+            content=powerup?QuestionBlockContent.Mushroom:QuestionBlockContent.Coin;
+        }
 
         private void Awake()
         {
@@ -167,6 +172,11 @@ namespace MarioBros.Blocks
         private void SpawnContent(PlayerHealth playerHealth)
         {
             QuestionBlockContent spawnType = content;
+            if(spawnType==QuestionBlockContent.Mushroom||spawnType==QuestionBlockContent.FireFlower)
+            {
+                if(CoopSession.CanSpawnFlower(playerHealth)){FireFlower.Spawn(transform.position);return;}
+                spawnType=QuestionBlockContent.Mushroom;
+            }
 
             // Adaptar Flor de Fuego a Champiñón si Mario es pequeño
             if (spawnType == QuestionBlockContent.FireFlower && adaptFlowerToMarioState && playerHealth != null)
@@ -185,6 +195,7 @@ namespace MarioBros.Blocks
                     if (coinPrefab != null)
                     {
                         GameObject coinObj = Instantiate(coinPrefab, transform.position, Quaternion.identity);
+                        coinObj.GetComponent<SpriteRenderer>().sharedMaterial=spriteRenderer.sharedMaterial;
                         Coin coinScript = coinObj.GetComponent<Coin>();
                         if (coinScript != null)
                         {
@@ -205,6 +216,7 @@ namespace MarioBros.Blocks
                     if (mushroomPrefab != null)
                     {
                         GameObject mObj = Instantiate(mushroomPrefab, transform.position, Quaternion.identity);
+                        mObj.GetComponent<SpriteRenderer>().sharedMaterial=spriteRenderer.sharedMaterial;
                         Mushroom mushroomScript = mObj.GetComponent<Mushroom>();
                         if (mushroomScript != null)
                         {
@@ -214,17 +226,9 @@ namespace MarioBros.Blocks
                     break;
 
                 case QuestionBlockContent.FireFlower:
-                    if (fireFlowerPrefab != null)
-                    {
-                        GameObject fObj = Instantiate(fireFlowerPrefab, transform.position, Quaternion.identity);
-                        // Si la flor tiene animación de salida
-                        Mushroom flowerAsItem = fObj.GetComponent<Mushroom>();
-                        if (flowerAsItem != null)
-                        {
-                            flowerAsItem.SpawnFromBlock(transform.position);
-                        }
-                    }
+                    FireFlower.Spawn(transform.position);
                     break;
+
 
                 case QuestionBlockContent.Starman:
                     if (starmanPrefab != null)

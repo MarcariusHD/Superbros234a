@@ -69,6 +69,10 @@ namespace MarioBros.Player
         public bool IsInvincible => isInvincible;
         public bool IsDead => isDead;
         public bool IsBig => currentPowerState == PowerState.Big || currentPowerState == PowerState.Fire;
+        public void UseCenteredSprites()
+        {
+            smallColliderOffset=new Vector2(0,.025f);bigColliderOffset=new Vector2(0,.525f);
+        }
 
         private void Awake()
         {
@@ -116,7 +120,7 @@ namespace MarioBros.Player
         public void TakeDamage()
         {
             // Si ya está muerto o es invencible, ignorar daño
-            if (isDead || isInvincible) return;
+            if (isDead || isInvincible || CoopSession.Transitioning) return;
             if (IsBig) MarioBros.Sound.SfxPlayer.Play("pipepowerdown");
 
             switch (currentPowerState)
@@ -311,9 +315,11 @@ namespace MarioBros.Player
         /// </summary>
         public void Die()
         {
-            if (isDead) return;
+            if (isDead || CoopSession.Transitioning) return;
 
             isDead = true;
+            CoopSession.BeginTransition();
+            CoopSession.ResetPowers();
             if (MarioBros.Sound.MusicManager.Instance != null) MarioBros.Sound.MusicManager.Instance.StopImmediate();
             MarioBros.Sound.SfxPlayer.Play("death");
 

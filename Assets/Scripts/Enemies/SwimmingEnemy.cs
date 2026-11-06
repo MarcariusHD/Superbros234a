@@ -38,6 +38,13 @@ namespace MarioBros.Enemies
         }
         private void FixedUpdate()
         {
+            float nearest=float.PositiveInfinity;
+            foreach(var candidate in Player.CoopSession.Players)
+            {
+                if(candidate==null||candidate.GetComponent<PlayerHealth>().IsDead)continue;
+                float distance=(candidate.transform.position-transform.position).sqrMagnitude;
+                if(distance<nearest){nearest=distance;player=candidate.transform;}
+            }
             if (player == null || GameManager.CurrentState != GameState.Playing || Mathf.Abs(player.position.x - transform.position.x) > 18)
             { body.linearVelocity = Vector2.zero; return; }
             phase += Time.deltaTime;

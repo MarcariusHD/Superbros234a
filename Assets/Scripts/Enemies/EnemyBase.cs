@@ -291,7 +291,7 @@ namespace MarioBros.Enemies
             if (playerRb != null)
             {
                 // Si mantiene presionada la tecla de salto (Espacio), rebota más alto estilo Mario NES
-                float force = MarioInput.JumpHeld ? stompBounceForceHigh : stompBounceForce;
+                float force = PlayerIdentity.InputFor(player.GetComponent<PlayerMovement>()).JumpHeld ? stompBounceForceHigh : stompBounceForce;
                 playerRb.linearVelocity = new Vector2(playerRb.linearVelocity.x, force);
             }
         }

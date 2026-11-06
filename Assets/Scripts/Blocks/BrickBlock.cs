@@ -222,6 +222,7 @@ namespace MarioBros.Blocks
         private void SpawnDebris()
         {
             var frames = Resources.LoadAll<Sprite>("ClassicEffects/Brick");
+            if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="World2_3")frames=Resources.LoadAll<Sprite>("Castle23/Brick");
             if (frames.Length > 0)
             {
                 bool underground = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Underground";

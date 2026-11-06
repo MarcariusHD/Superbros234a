@@ -34,6 +34,12 @@ namespace MarioBros.Level
             animation.SetScriptedPose("pipe");
             yield return Slide(finalPosition-Vector3.up*(sprite.bounds.size.y+.25f),finalPosition);
         }
+        public IEnumerator EnterUp(Vector3 mouth)
+        {
+            Sound.SfxPlayer.Play("pipepowerdown");animation.SetScriptedPose("pipe");
+            player.transform.position=new Vector3(mouth.x,player.transform.position.y,0);
+            yield return Slide(player.transform.position,player.transform.position+Vector3.up*(sprite.bounds.size.y+1));
+        }
         private IEnumerator Slide(Vector3 start,Vector3 end)
         {
             for(float elapsed=0;elapsed<.8f;elapsed+=Time.unscaledDeltaTime)

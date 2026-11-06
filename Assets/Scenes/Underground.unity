@@ -57753,7 +57753,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb1ce5d9e76666f4ca7acf942733b31b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MarioBros.Level.LevelExit
-  nextScene: World2_3Pending
+  nextScene: World2_3
   requireDown: 1
 --- !u!61 &897409200
 BoxCollider2D:
@@ -59655,9 +59655,7 @@ GameObject:
   - component: {fileID: 933554887}
   - component: {fileID: 933554886}
   m_Layer: 0
-  m_Name: 'Warp 2-3
-
-    PENDIENTE'
+  m_Name: Warp 2-3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59702,9 +59700,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '2-3
-
-    PENDIENTE'
+  m_text: 2-3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

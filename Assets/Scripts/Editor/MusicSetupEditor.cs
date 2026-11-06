@@ -13,6 +13,11 @@ public static class MusicSetupEditor
 {
     private const string MusicFolder = "Assets/Audio/Music";
     private const string PrefabPath = "Assets/Resources/MusicManager.prefab";
+    private static string TrackPath(string file)
+    {
+        string mp3 = $"{MusicFolder}/{file}.mp3";
+        return File.Exists(mp3) ? mp3 : $"{MusicFolder}/{file}.wav";
+    }
 
     // escena -> (archivo, loop, detener al terminar nivel)
     private static readonly (string scene, string file, bool loop, bool stopOnEnd)[] Map =
@@ -30,7 +35,7 @@ public static class MusicSetupEditor
         // 1) Importación: música en streaming, comprimida (no ocupa RAM)
         foreach (var m in Map)
         {
-            string path = $"{MusicFolder}/{m.file}.wav";
+            string path = TrackPath(m.file);
             var imp = AssetImporter.GetAtPath(path) as AudioImporter;
             if (imp == null) { Debug.LogError($"[Musica] No encuentro {path}"); continue; }
             var s = imp.defaultSampleSettings;
@@ -56,7 +61,7 @@ public static class MusicSetupEditor
             var el = list.GetArrayElementAtIndex(i);
             el.FindPropertyRelative("sceneName").stringValue = Map[i].scene;
             el.FindPropertyRelative("clip").objectReferenceValue =
-                AssetDatabase.LoadAssetAtPath<AudioClip>($"{MusicFolder}/{Map[i].file}.wav");
+                AssetDatabase.LoadAssetAtPath<AudioClip>(TrackPath(Map[i].file));
             el.FindPropertyRelative("loop").boolValue = Map[i].loop;
             el.FindPropertyRelative("volume").floatValue = 1f;
             el.FindPropertyRelative("stopWhenLevelEnds").boolValue = Map[i].stopOnEnd;
@@ -86,7 +91,7 @@ public static class MusicSetupEditor
 
         foreach (var m in Map)
         {
-            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{MusicFolder}/{m.file}.wav");
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(TrackPath(m.file));
             if (clip == null) problems.Add($"Falta el audio {m.file}.wav");
             else if (clip.length < 1f) problems.Add($"{m.file}.wav dura menos de 1 s");
             if (!inBuild.Contains(m.scene)) problems.Add($"La escena {m.scene} no esta en Build Settings.");

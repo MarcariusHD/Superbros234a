@@ -152,7 +152,8 @@ namespace MarioBros.Items
             isCollected = true;
 
             // Aplicar Power-up a Mario
-            playerHealth.PowerUp(PowerState.Big);
+            if(playerHealth.CurrentPowerState==PowerState.Small)playerHealth.PowerUp(PowerState.Big);
+            else Sound.SfxPlayer.Play("powerup");
 
             // Sumar puntos
             if (GameManager.Instance != null)

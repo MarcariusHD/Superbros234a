@@ -46,6 +46,7 @@ namespace MarioBros.Sound
         private Coroutine fadeRoutine;
         private bool muted;
         private bool pausedByGame;
+        private Coroutine hurryRoutine;
 
         public float MusicVolume => musicVolume;
         public bool IsMuted => muted;
@@ -116,7 +117,7 @@ namespace MarioBros.Sound
                     break;
                 case GameState.Playing:
                     pausedByGame = false;
-                    source.UnPause();
+                    if (hurryRoutine == null) source.UnPause();
                     break;
                 case GameState.LevelComplete:
                 case GameState.GameOver:
@@ -136,7 +137,7 @@ namespace MarioBros.Sound
         /// <summary>Reproduce la pista configurada para esa escena (o silencio si no hay).</summary>
         public void PlayForScene(string sceneName)
         {
-            var track = FindTrack(sceneName);
+            var track = FindTrack(sceneName == "World2_3" ? "Underground" : sceneName);
             if (sceneName == "GameOver" && track != null)
                 track.clip = SfxPlayer.GetClip("gameover") ?? track.clip;
             if (track == null) { Stop(); return; }
@@ -145,6 +146,7 @@ namespace MarioBros.Sound
 
         public void Play(SceneTrack track)
         {
+            CancelHurry();
             current = track;
             StartFade(StartTrack(track));
         }
@@ -152,15 +154,42 @@ namespace MarioBros.Sound
         /// <summary>Detiene la música con fade-out.</summary>
         public void Stop()
         {
+            CancelHurry();
             current = null;
             StartFade(StopRoutine());
         }
 
         public void StopImmediate()
         {
+            CancelHurry();
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
             fadeRoutine = null;current = null;
             source.Stop();
+        }
+
+        private void CancelHurry()
+        {
+            if (hurryRoutine != null) StopCoroutine(hurryRoutine);
+            hurryRoutine = null;
+        }
+
+        public void HurryUp()
+        {
+            if (hurryRoutine != null) return;
+            SfxPlayer.Play("hurryup");
+            if (current != null) hurryRoutine = StartCoroutine(HurrySequence());
+        }
+
+        private IEnumerator HurrySequence()
+        {
+            if (fadeRoutine != null) StopCoroutine(fadeRoutine);
+            fadeRoutine = null;source.volume = TargetVolume;
+            source.Pause();
+            var warning = SfxPlayer.GetClip("hurryup");
+            yield return new WaitForSeconds(warning != null ? warning.length : 3f);
+            source.pitch = 1.25f;
+            if (!pausedByGame) source.UnPause();
+            hurryRoutine = null;
         }
 
         /// <summary>Cambia el volumen general (0-1), por ejemplo desde un menú de opciones.</summary>
@@ -201,6 +230,7 @@ namespace MarioBros.Sound
             if (source.isPlaying) yield return FadeTo(0f, fadeOutSeconds);
             source.Stop();
             source.clip = track.clip;
+            source.pitch = 1f;
             source.loop = track.loop;
             source.volume = 0f;
             source.Play();

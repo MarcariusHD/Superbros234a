@@ -114,7 +114,7 @@ namespace MarioBros.UI
             {
                 ResetTimer();
                 SetState(GameState.Playing);
-                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : null;
+                string world = scene.name == "SampleScene" ? "1-1" : scene.name == "Underground" ? "1-2" : scene.name == "Underwater" ? "2-2" : scene.name == "World2_3" ? "2-3" : null;
                 if (world != null) LastWorld = world;
                 if (world != null && Resources.Load<Sprite>("ClassicUI/LevelIntro") != null)
                     StartCoroutine(LevelIntroduction(world));
@@ -243,7 +243,11 @@ namespace MarioBros.UI
             if (TimeRemaining > 0)
             {
                 TimeRemaining--;
-                if (TimeRemaining == 100) MarioBros.Sound.SfxPlayer.Play("hurryup");
+                if (TimeRemaining == 100)
+                {
+                    if (MarioBros.Sound.MusicManager.Instance != null) MarioBros.Sound.MusicManager.Instance.HurryUp();
+                    else MarioBros.Sound.SfxPlayer.Play("hurryup");
+                }
                 OnTimerChanged?.Invoke(TimeRemaining);
 
                 if (TimeRemaining == 0)
@@ -338,6 +342,7 @@ namespace MarioBros.UI
 
         public void RestartGame()
         {
+            Player.CoopSession.ResetPowers();
             StopAllCoroutines();
             InitializeGame();
             SceneManager.LoadScene("SampleScene");

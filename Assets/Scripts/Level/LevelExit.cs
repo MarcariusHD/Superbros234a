@@ -15,7 +15,7 @@ namespace MarioBros.Level
         private void OnTriggerStay2D(Collider2D other)
         {
             var health = other.GetComponent<PlayerHealth>();
-            if (entered || health == null || health.IsDead || (requireDown && !MarioInput.Down)) return;
+            if (entered || health == null || health.IsDead || (requireDown && !PlayerIdentity.InputFor(health).Down)) return;
             if (GameManager.CurrentState != GameState.Playing) return;
             if (requireDown && (Mathf.Abs(other.bounds.center.x - transform.position.x) > .55f ||
                 other.bounds.min.y < transform.position.y - .3f)) return;
@@ -31,6 +31,7 @@ namespace MarioBros.Level
         private IEnumerator Travel(GameObject player)
         {
             GameManager.Instance.LevelCompleted();
+            CoopSession.BeginTransition();
             var travel=new PipeTransit(player);
             yield return travel.Enter(transform.position,requireDown);
             SceneManager.LoadScene(nextScene);

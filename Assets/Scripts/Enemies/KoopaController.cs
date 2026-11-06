@@ -76,6 +76,11 @@ namespace MarioBros.Enemies
             walkOne = Resources.Load<Sprite>("MarioFrames/Koopa_Walk1");
             walkTwo = Resources.Load<Sprite>("MarioFrames/Koopa_Walk2");
             shellSprite = Resources.Load<Sprite>("MarioFrames/Koopa_Shell");
+            if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="World2_3")
+            {
+                walkOne=Resources.Load<Sprite>("Castle23/Koopa1");walkTwo=Resources.Load<Sprite>("Castle23/Koopa2");
+                shellSprite=Resources.Load<Sprite>("Castle23/KoopaShell");
+            }
 
             boxCol = GetComponent<BoxCollider2D>();
             speed = walkSpeed;
